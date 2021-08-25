@@ -56,7 +56,9 @@ class Treblle
   def capture(params)
     data = DataBuilder.new(params).call
 
-    send_to_treblle(data)
+    Thread.new do
+      send_to_treblle(data)
+    end
   rescue Exception => exception
     Rails.logger.error(exception.message)
   end
