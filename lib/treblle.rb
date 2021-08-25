@@ -66,7 +66,8 @@ class Treblle
     req = Net::HTTP::Post.new(uri)
     req['Content-Type'] = 'application/json'
     req['x-api-key'] = ENV.fetch('TREBLLE_API_KEY') { '' }
-    req.body = data.to_json
+    req.body = data
+    puts data
     res = Net::HTTP.start(uri.hostname, uri.port, :use_ssl => true) do |http|
       http.request(req)
     end

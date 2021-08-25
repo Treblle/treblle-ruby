@@ -1,7 +1,7 @@
 require 'socket'
 
 class DataBuilder
-  DEFAULT_SENSITIVE_FIELDS = [
+  DEFAULT_SENSITIVE_FIELDS = Set[
     "password",
     "pwd",
     "secret",
@@ -68,14 +68,14 @@ class DataBuilder
           user_agent: user_agent,
           method: request_method,
           headers: request.headers.env.reject { |key| key.to_s.include?('.') },
-          body: request.request_parameters
+          body: without_sensitive_attrs(request.query_parameters)
         },
         response: {
           headers: headers,
           code: status,
           size: json_response&.size,
           load_time: time_spent,
-          body: json_response,
+          body: without_sensitive_attrs(json_response),
           errors: build_error_object(exception)
         }
       }
@@ -105,6 +105,30 @@ class DataBuilder
   end
 
   private
+
+  def without_sensitive_attrs(obj)
+    sensitive_attrs = DEFAULT_SENSITIVE_FIELDS
+    obj.each do |k,v|
+      value = v || k
+      if value.is_a?(Hash) || value.is_a?(Array)
+        without_sensitive_attrs(value)
+      else
+        if sensitive_attrs.include?(k.to_s)
+          obj[k] = '*' * v.to_s.length
+        end
+      end
+    end
+    obj
+  end
+
+  def sensitive_attrs
+    @sensitive_attrs ||= user_sensitive_fields.merge(DEFAULT_SENSITIVE_FIELDS)
+  end
+
+  def user_sensitive_fields
+    fields = ENV.fetch('TREBLLE_SENSITIVE_FIELDS') { '' }.gsub(/\s+/, '')
+    fields.split(',').to_set
+  end
 
   def build_error_object(exception)
     return [] unless exception.present?
