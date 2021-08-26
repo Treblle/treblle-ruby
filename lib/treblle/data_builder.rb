@@ -51,9 +51,9 @@ class DataBuilder
         server: {
           ip: server_ip,
           timezone: Time.zone.name,
-          software: '',
+          software: request_headers.try(:[], 'SERVER_SOFTWARE'),
           signature: '',
-          protocol: '',
+          protocol: request_headers.try(:[], 'SERVER_PROTOCOL'),
           os: {
           }
         },
@@ -64,16 +64,16 @@ class DataBuilder
         request: {
           timestamp: started_at.to_formatted_s(:db),
           ip: ip,
-          url: url,
+          url: request.original_url,
           user_agent: user_agent,
           method: request_method,
-          headers: request.headers.env.reject { |key| key.to_s.include?('.') },
+          headers: request_headers,
           body: without_sensitive_attrs(request.query_parameters)
         },
         response: {
-          headers: headers,
+          headers: headers || {},
           code: status,
-          size: json_response&.size,
+          size: json_response&.to_json&.bytesize || 0,
           load_time: time_spent,
           body: without_sensitive_attrs(json_response),
           errors: build_error_object(exception)
@@ -107,6 +107,8 @@ class DataBuilder
   private
 
   def without_sensitive_attrs(obj)
+    return {} unless obj.present?
+
     sensitive_attrs = DEFAULT_SENSITIVE_FIELDS
     obj.each do |k,v|
       value = v || k
@@ -138,7 +140,7 @@ class DataBuilder
         source: 'onError',
         type: exception.class,
         message: exception.message,
-        file: '',
+        file: exception.backtrace.try(:first),
         line: ''
       }
     ]
@@ -153,5 +155,9 @@ class DataBuilder
 
   def server_ip
     Socket.ip_address_list.find { |ai| ai.ipv4? && !ai.ipv4_loopback? }.ip_address
+  end
+
+  def request_headers
+    @request_headers ||= request.headers.env.reject { |key| key.to_s.include?('.') }
   end
 end
