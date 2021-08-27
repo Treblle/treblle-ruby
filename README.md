@@ -1,4 +1,4 @@
-# [Treblle SDK for Ruby on Rails]
+# Treblle SDK for Ruby on Rails
 
 Treblle makes it super easy to understand what’s going on with your APIs and the apps that use them. Just by adding Treblle to your API out of the box you get:
 
@@ -36,6 +36,8 @@ Finally, make sure to set environemnt variables as described below:
 | TREBLLE_API_KEY         | (required) Valid API key obtained during registration on treblle.com             |
 | TREBLLE_PROJECT_ID      | (required) Valid Project ID obtained after creating a new project on treblle.com |
 | TREBLLE_SENSITIVE_FIELDS| (optional) Additional optional keys that will be masked before sending to Treblle|
+
+`TREBLLE_SENSITIVE_FIELDS` should be comma separated values like: `cc_number,cvv,dont_show_this_field`.
 
 ## License
 
