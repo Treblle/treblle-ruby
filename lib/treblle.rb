@@ -55,6 +55,7 @@ class Treblle
 
   def capture(params)
     data = DataBuilder.new(params).call
+    return if data&.bytesize.to_i > 2.megabytes
 
     Thread.new do
       send_to_treblle(data)
