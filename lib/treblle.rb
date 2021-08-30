@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 require 'uri'
 require 'net/http'
 require 'treblle/data_builder'
 
+# Treblle middleware for request interception and gathering.
 class Treblle
   TREBLLE_URI = 'https://rocknrolla.treblle.com'
   TREBLLE_VERSION = '0.6'

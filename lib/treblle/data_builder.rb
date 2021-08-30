@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'socket'
 
 # Gathers and builds body payload to be sent to Treblle in json format.
