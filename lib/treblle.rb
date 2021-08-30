@@ -22,31 +22,32 @@ class Treblle
       begin
         json_response = JSON.parse(to_parse)
       rescue JSON::ParserError, TypeError
+        # continue with original values when unable to parse reponse to json
         return [status, headers, response]
       end
 
       params = {
-        env: env,
-        status: status,
-        started_at: started_at,
         ended_at: Time.now,
-        request: request,
+        env: env,
         headers: headers,
-        json_response: json_response
+        json_response: json_response,
+        request: request,
+        started_at: started_at,
+        status: status
       }
       capture(params)
     rescue Exception => e
-      puts 'IN EXCEPTION'
       status = status_code_for_exception(e)
       params = {
-        env: env,
-        status: status,
-        started_at: started_at,
         ended_at: Time.now,
-        request: request,
+        env: env,
+        exception: e,
         headers: headers,
-        exception: e
+        request: request,
+        started_at: started_at,
+        status: status
       }
+      # send error payload to treblle, but raise exception as well
       capture(params)
       raise e
     end
@@ -54,9 +55,12 @@ class Treblle
     [status, headers, response]
   end
 
+  # Creates data to send in a format that Treblle expects and does the sending in a new thread
+  # for perfomance reasons.
+  # @param [Object] params
   def capture(params)
     data = DataBuilder.new(params).call
-    return if data&.bytesize.to_i > 2.megabytes
+    return if data&.bytesize.to_i > 2.megabytes # ignore the capture for unnaturally large requests
 
     Thread.new do
       send_to_treblle(data)

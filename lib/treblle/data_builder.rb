@@ -1,5 +1,7 @@
 require 'socket'
 
+# Gathers and builds body payload to be sent to Treblle in json format.
+# Hides sensitive data based on default values and additional ones provided via env variable.
 class DataBuilder
   DEFAULT_SENSITIVE_FIELDS = Set[
     'card_number',
@@ -19,14 +21,14 @@ class DataBuilder
   attr_accessor :env, :status, :started_at, :ended_at, :request, :headers, :json_response, :exception
 
   def initialize(params)
-    @env = params[:env]
-    @status = params[:status]
-    @started_at = params[:started_at]
     @ended_at = params[:ended_at]
-    @request = params[:request]
+    @env = params[:env]
+    @exception = params[:exception]
     @headers = params[:headers]
     @json_response = params[:json_response]
-    @exception = params[:exception]
+    @request = params[:request]
+    @started_at = params[:started_at]
+    @status = params[:status]
   end
 
   def call
@@ -114,7 +116,7 @@ class DataBuilder
         source: 'onError',
         type: exception.class,
         message: exception.message,
-        file: exception.backtrace.try(:first),
+        file: exception.backtrace.try(:first) || '',
       }
     ]
   end
