@@ -118,7 +118,7 @@ class DataBuilder
         source: 'onError',
         type: exception.class,
         message: exception.message,
-        file: exception.backtrace.try(:first) || '',
+        file: exception.backtrace.try(:first) || ''
       }
     ]
   end
