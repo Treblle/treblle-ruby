@@ -3,7 +3,8 @@ require 'net/http'
 require 'treblle/data_builder'
 
 class Treblle
-  TREBLLE_URI = 'https://rocknrolla.treblle.com'.freeze
+  TREBLLE_URI = 'https://rocknrolla.treblle.com'
+  TREBLLE_VERSION = '0.6'
 
   def initialize(app)
     @app = app
@@ -34,9 +35,9 @@ class Treblle
         json_response: json_response
       }
       capture(params)
-    rescue Exception => exception
+    rescue Exception => e
       puts 'IN EXCEPTION'
-      status = status_code_for_exception(exception)
+      status = status_code_for_exception(e)
       params = {
         env: env,
         status: status,
@@ -44,10 +45,10 @@ class Treblle
         ended_at: Time.now,
         request: request,
         headers: headers,
-        exception: exception
+        exception: e
       }
       capture(params)
-      raise exception
+      raise e
     end
 
     [status, headers, response]
@@ -60,8 +61,8 @@ class Treblle
     Thread.new do
       send_to_treblle(data)
     end
-  rescue Exception => exception
-    Rails.logger.error(exception.message)
+  rescue Exception => e
+    Rails.logger.error(e.message)
   end
 
   def send_to_treblle(data)
@@ -71,7 +72,7 @@ class Treblle
     req['x-api-key'] = ENV.fetch('TREBLLE_API_KEY') { '' }
     req.body = data
     puts data
-    res = Net::HTTP.start(uri.hostname, uri.port, :use_ssl => true) do |http|
+    res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
       http.request(req)
     end
     puts res.try(:body)

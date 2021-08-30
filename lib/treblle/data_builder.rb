@@ -2,18 +2,18 @@ require 'socket'
 
 class DataBuilder
   DEFAULT_SENSITIVE_FIELDS = Set[
-    "password",
-    "pwd",
-    "secret",
-    "password_confirmation",
-    "passwordConfirmation",
-    "cc",
-    "card_number",
-    "cardNumber",
-    "ccv",
-    "ssn",
-    "credit_score",
-    "creditScore",
+    'card_number',
+    'cardNumber',
+    'cc',
+    'ccv',
+    'credit_score',
+    'creditScore',
+    'password',
+    'password_confirmation',
+    'passwordConfirmation',
+    'pwd',
+    'secret',
+    'ssn'
   ].freeze
 
   attr_accessor :env, :status, :started_at, :ended_at, :request, :headers, :json_response, :exception
@@ -30,23 +30,20 @@ class DataBuilder
   end
 
   def call
-    url = env['REQUEST_URI']
-    path = env['PATH_INFO']
-    user = try_current_user(env)
+    # url = env['REQUEST_URI']
+    # path = env['PATH_INFO']
+    # http_host = env['HTTP_HOST']
     time_spent = ended_at - started_at
     user_agent = env['HTTP_USER_AGENT']
     ip = env['action_dispatch.remote_ip'].calculate_ip
     request_method = env['REQUEST_METHOD']
-    http_host = env['HTTP_HOST']
     project_id = ENV.fetch('TREBLLE_PROJECT_ID') { '' }
-    version = '0.6'
-    sdk = 'ruby'
 
     data = {
       api_key: ENV.fetch('TREBLLE_API_KEY') { '' },
       project_id: project_id,
-      version: version,
-      sdk: sdk,
+      version: Treblle::TREBLLE_VERSION,
+      sdk: 'ruby',
       data: {
         server: {
           ip: server_ip,
@@ -54,8 +51,7 @@ class DataBuilder
           software: request_headers.try(:[], 'SERVER_SOFTWARE'),
           signature: '',
           protocol: request_headers.try(:[], 'SERVER_PROTOCOL'),
-          os: {
-          }
+          os: {}
         },
         language: {
           name: 'ruby',
@@ -81,27 +77,7 @@ class DataBuilder
       }
     }
 
-    # puts api_key
-    # puts project_id
-    # puts version
-    # puts sdk
-
-
-    # puts status
-    # puts ip
-    # puts request_method
-    # puts url
-    # puts path
-    # puts user
-    # puts time_spent
-    # puts user_agent
-    # puts http_host
-    # puts exception&.class
-    # puts exception&.message
-    # puts json_response
-    # puts '%' * 100
-    # puts data.to_json
-    return data.to_json
+    data.to_json
   end
 
   private
@@ -110,14 +86,12 @@ class DataBuilder
     return {} unless obj.present?
 
     sensitive_attrs = DEFAULT_SENSITIVE_FIELDS
-    obj.each do |k,v|
+    obj.each do |k, v|
       value = v || k
       if value.is_a?(Hash) || value.is_a?(Array)
         without_sensitive_attrs(value)
-      else
-        if sensitive_attrs.include?(k.to_s)
-          obj[k] = '*' * v.to_s.length
-        end
+      elsif sensitive_attrs.include?(k.to_s)
+        obj[k] = '*' * v.to_s.length
       end
     end
     obj
@@ -141,16 +115,8 @@ class DataBuilder
         type: exception.class,
         message: exception.message,
         file: exception.backtrace.try(:first),
-        line: ''
       }
     ]
-  end
-
-  def try_current_user(env)
-    controller = env['action_controller.instance']
-    return unless controller.respond_to?(:current_user, true)
-    return unless [-1, 0].include?(controller.method(:current_user).arity)
-    controller.__send__(:current_user)
   end
 
   def server_ip
