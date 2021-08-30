@@ -116,7 +116,7 @@ class DataBuilder
     [
       {
         source: 'onError',
-        type: exception.class,
+        type: exception.class.to_s || 'Unhandled error',
         message: exception.message,
         file: exception.backtrace.try(:first) || ''
       }
