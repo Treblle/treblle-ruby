@@ -34,9 +34,6 @@ class DataBuilder
   end
 
   def call
-    # url = env['REQUEST_URI']
-    # path = env['PATH_INFO']
-    # http_host = env['HTTP_HOST']
     time_spent = ended_at - started_at
     user_agent = env['HTTP_USER_AGENT']
     ip = env['action_dispatch.remote_ip'].calculate_ip
