@@ -82,7 +82,7 @@ class Treblle
     res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
       http.request(req)
     end
-    puts res.try(:body)
+    res.try(:body)
   end
 
   def status_code_for_exception(exception)
