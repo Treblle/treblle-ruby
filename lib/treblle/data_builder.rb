@@ -42,6 +42,7 @@ class DataBuilder
     ip = env['action_dispatch.remote_ip'].calculate_ip
     request_method = env['REQUEST_METHOD']
     project_id = ENV.fetch('TREBLLE_PROJECT_ID') { '' }
+    request_body = request_method.downcase == 'get' ? request.query_parameters : safe_to_json(request.raw_post)
 
     data = {
       api_key: ENV.fetch('TREBLLE_API_KEY') { '' },
@@ -68,7 +69,7 @@ class DataBuilder
           user_agent: user_agent,
           method: request_method,
           headers: request_headers,
-          body: without_sensitive_attrs(request.query_parameters)
+          body: without_sensitive_attrs(request_body)
         },
         response: {
           headers: headers || {},
@@ -89,7 +90,6 @@ class DataBuilder
   def without_sensitive_attrs(obj)
     return {} unless obj.present?
 
-    sensitive_attrs = DEFAULT_SENSITIVE_FIELDS
     obj.each do |k, v|
       value = v || k
       if value.is_a?(Hash) || value.is_a?(Array)
@@ -99,6 +99,8 @@ class DataBuilder
       end
     end
     obj
+  rescue StandardError => e
+    Rails.logger.error e.message
   end
 
   def sensitive_attrs
@@ -129,5 +131,11 @@ class DataBuilder
 
   def request_headers
     @request_headers ||= request.headers.env.reject { |key| key.to_s.include?('.') }
+  end
+
+  def safe_to_json(obj)
+    JSON.parse(obj)
+  rescue StandardError => e
+    {}
   end
 end
