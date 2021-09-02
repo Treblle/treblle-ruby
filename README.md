@@ -20,7 +20,7 @@ Add the gem to your Gemfile:
 
 ```rb
 # Gemfile
-gem "treblle", "~> 1.0"
+gem "treblle", "~> 1.0.1"
 ```
 
 Then add following line to `config/application.rb`, or if you want to include it to specific environment only, then e.g. `config/environments/development.rb` which registers Treblle middleware.
