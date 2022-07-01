@@ -79,7 +79,11 @@ class DataBuilder
       }
     }
 
-    data.to_json
+    begin
+      data.to_json
+    rescue Exception
+      JSON.dump(data)
+    end
   end
 
   private
