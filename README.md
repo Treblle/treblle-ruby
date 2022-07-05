@@ -39,6 +39,8 @@ Finally, make sure to set environemnt variables as described below:
 
 `TREBLLE_SENSITIVE_FIELDS` should be comma separated values like: `cc_number,cvv,dont_show_this_field`.
 
+Note: if using `dotenv` or similar library in development to load environment variables, make sure to have this gem loaded AFTER dotenv, othewise variables may not be set. To be on the safe side when running locally you can use `export` command. In production make sure these variables are set following provider service docs.
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License].
