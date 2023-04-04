@@ -77,7 +77,7 @@ gem "treblle", "~> 1.0.3"
 ```
 Then add following line to config/application.rb, or if you want to include it to specific environment only, then e.g. `config/environments/development.rb` which registers Treblle middleware.
 
-``ruby
+```ruby
 config.middleware.use(Treblle)
 ```
 Finally, make sure to set environemnt variables as described below:
