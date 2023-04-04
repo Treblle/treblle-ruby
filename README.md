@@ -84,7 +84,7 @@ Finally, make sure to set environemnt variables as described below:
 
 - `TREBLLE_API_KEY` (required)
 - `TREBLLE_PROJECT_ID` (required)
-- `TREBLLE_SENSITIVE_FIELDS (optional)
+- `TREBLLE_SENSITIVE_FIELDS` (optional)
 
 > See the [docs](https://docs.treblle.com/en/integrations/ruby) for this SDK to learn more.
 
