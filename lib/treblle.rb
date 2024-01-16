@@ -31,12 +31,11 @@ class Treblle
 
       params = {
         ended_at: Time.now,
-        env: env,
-        headers: headers,
-        json_response: json_response,
-        request: request,
-        started_at: started_at,
-        status: status
+        env:,
+        headers:,
+        json_response:,
+        request:,
+        status:
       }
       capture(params)
     rescue Exception => e
