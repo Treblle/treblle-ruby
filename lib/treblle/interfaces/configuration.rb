@@ -25,10 +25,12 @@ module Treblle
         @restricted_endpoints = []
         @sensitive_attrs = DEFAULT_SENSITIVE_ATTRS
         @app_version = nil
+        @api_key = nil
+        @project_id = nil
       end
 
       def valid?
-        api_key.present? && project_id.present?
+        api_key && project_id
       end
 
       def monitoring_enabled?(request_url)
@@ -36,13 +38,13 @@ module Treblle
       end
 
       def sensitive_attrs=(value)
-        self.sensitive_attrs = DEFAULT_SENSITIVE_ATTRS + value
+        @sensitive_attrs = value ? DEFAULT_SENSITIVE_ATTRS + value : DEFAULT_SENSITIVE_ATTRS
       end
 
       private
 
       def restricted_endpoint?(request_url)
-        @restricted_endpoints.any? do |endpoint|
+        restricted_endpoints.any? do |endpoint|
           pattern = Regexp.escape(endpoint).gsub('\*', '.*')
           Regexp.new("^#{pattern}$") =~ request_url
         end
