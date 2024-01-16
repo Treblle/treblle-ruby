@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'action_dispatch'
 module Treblle
   module Interfaces
     class Request
@@ -25,7 +26,7 @@ module Treblle
       end
 
       def header_to_include?(header)
-        return false if header.starts_with?('rack', 'puma')
+        return false if header.start_with?('rack', 'puma')
 
         HEADER_PREFIXES.any? do |prefix|
           header.to_s.start_with?(prefix)
