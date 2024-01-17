@@ -4,7 +4,10 @@ require 'action_dispatch'
 module Treblle
   module Interfaces
     class Request
-      HEADER_PREFIXES = %w[HTTP AUTHORIZATION QUERY CONTENT REMOTE REQUEST SERVER ACCEPT USER HOST X].freeze
+      HEADER_PREFIXES = %w[
+        HTTP AUTHORIZATION QUERY CONTENT REMOTE
+        REQUEST SERVER ACCEPT USER HOST X PATH
+      ].freeze
 
       def initialize(env)
         @metadata = ActionDispatch::Request.new(env)
@@ -22,7 +25,7 @@ module Treblle
       end
 
       def normalize_header(header)
-        header.gsub(/^HTTP_/, '').split('_').map(&:capitalize).join('-')
+        header.delete_prefix('HTTP_').gsub('_', '-')
       end
 
       def header_to_include?(header)
