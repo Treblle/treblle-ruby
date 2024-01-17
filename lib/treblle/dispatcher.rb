@@ -2,6 +2,7 @@
 
 require 'uri'
 require 'net/http'
+require 'securerandom'
 
 module Treblle
   class Dispatcher
@@ -38,6 +39,7 @@ module Treblle
       req = Net::HTTP::Post.new(uri)
       req['Content-Type'] = 'application/json'
       req['x-api-key'] = configuration.api_key
+      req['x-treblle-trace-id'] = SecureRandom.uuid
       req.body = payload
       req
     end
