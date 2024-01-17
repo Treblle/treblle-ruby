@@ -2,7 +2,7 @@ module Treblle
   module Interfaces
     class Response
       def initialize(response)
-        @status, @headers, @response = response
+        @status, @headers, @response = response || [500, {}, {}]
         @body = parse_response_body
         @size = response_size
       end
@@ -17,7 +17,7 @@ module Treblle
 
       def parse_response_body
         JSON.parse(response.body)
-      rescue JSON::ParserError
+      rescue JSON::ParserError, NoMethodError
         {}
       end
     end
