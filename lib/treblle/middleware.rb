@@ -28,16 +28,17 @@ module Treblle
       begin
         response = @app.call(env)
       rescue StandardError => e
-        Rails.logger.error(e.message)
+        handle_monitoring(env, response, started_at, e)
         raise e
       end
 
-      handle_monitoring(env, response, started_at)
+      handle_monitoring(env, response, started_at) unless env['rack.exception']
+
       response
     end
 
-    def handle_monitoring(env, response, started_at)
-      payload = PayloadBuilder.new(env:, response:, started_at:).call
+    def handle_monitoring(env, response, started_at, exception: nil)
+      payload = PayloadBuilder.new(env:, response:, started_at:, exception:).call
       Dispatcher.new(payload:).call
     rescue StandardError => e
       Rails.logger.error(e.message)

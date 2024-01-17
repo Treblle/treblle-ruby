@@ -38,7 +38,7 @@ module Treblle
 
       def parse_request_body
         JSON.parse(metadata.raw_post)
-      rescue JSON::ParserError
+      rescue JSON::ParserError, NoMethodError
         {}
       end
     end
