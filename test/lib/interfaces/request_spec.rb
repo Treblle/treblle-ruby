@@ -1,6 +1,7 @@
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'treblle/interfaces/request'
+require 'rack/mock'
 
 describe Treblle::Interfaces::Request do
   let(:path) { '/api/some_endpoint' }
