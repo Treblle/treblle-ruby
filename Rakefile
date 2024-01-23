@@ -1,10 +1,9 @@
-require 'minitest'
+require 'rake/testtask'
 
-Minitest::TestTask.create(:test) do |t|
-  t.libs << 'test'
+Rake::TestTask.new do |t|
   t.libs << 'lib'
-  t.warning = false
-  t.test_globs = ['test/**/*_spec.rb']
+  t.libs << 'test'
+  t.test_files = ['test/**/*_spec.rb']
 end
-
+desc 'Run tests'
 task default: :test
