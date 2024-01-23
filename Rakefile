@@ -1,4 +1,4 @@
-require 'minitest/test_task'
+require 'minitest'
 
 Minitest::TestTask.create(:test) do |t|
   t.libs << 'test'
