@@ -19,15 +19,7 @@ Gem::Specification.new do |spec|
   spec.description = <<~EOF
     Treblle is a lightweight SDK that helps Engineering and Product teams
      build, ship & maintain REST based APIs faster.
-     Treblle SDKs can…
-     Send requests to your Treblle dashboard
-     Send error to your Treblle dashboard
   EOF
 
   spec.required_ruby_version = '>= 2.4.0'
-  spec.add_dependency 'actionpack'
-  spec.add_dependency 'activesupport'
-  spec.add_dependency 'json'
-  spec.add_dependency 'minitest'
-  spec.add_dependency 'rake'
 end

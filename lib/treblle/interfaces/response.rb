@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'active_support'
 require 'json'
+require 'active_support/json'
 
 module Treblle
   module Interfaces
