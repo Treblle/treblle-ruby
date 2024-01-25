@@ -37,7 +37,7 @@ module Treblle
       response
     end
 
-    def handle_monitoring(env, response, started_at, exception)
+    def handle_monitoring(env, response, started_at, exception: nil)
       payload = PayloadBuilder.new(env:, response:, started_at:, exception:).call
       Dispatcher.new(payload:).call
     rescue StandardError => e
