@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require 'json'
 require 'action_dispatch'
+
 module Treblle
   module Interfaces
     class Request

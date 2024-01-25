@@ -1,10 +1,17 @@
-require 'minitest/test_task'
+# frozen_string_literal: true
 
-Minitest::TestTask.create(:test) do |t|
-  t.libs << 'test'
-  t.libs << 'lib'
-  t.warning = false
-  t.test_globs = ['test/**/*_spec.rb']
+require 'rake/testtask'
+
+begin
+  require 'bundler/setup'
+rescue LoadError
+  puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
 
+Rake::TestTask.new(:test) do |t|
+  t.libs << 'lib'
+  t.libs << 'test'
+  t.test_files = ['test/**/*_spec.rb']
+end
+desc 'Run tests'
 task default: :test

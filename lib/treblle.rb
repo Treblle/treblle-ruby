@@ -2,6 +2,7 @@
 
 require 'treblle/middleware'
 require 'treblle/interfaces/configuration'
+
 # Treblle middleware for request interception and gathering.
 module Treblle
   class << self

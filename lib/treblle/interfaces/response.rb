@@ -1,3 +1,8 @@
+# frozen_string_literal: true
+
+require 'json'
+require 'active_support/json'
+
 module Treblle
   module Interfaces
     class Response
