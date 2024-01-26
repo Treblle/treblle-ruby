@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'minitest/spec'
+require 'rspec'
 require 'treblle/version'
 
-describe Treblle do
+RSpec.describe Treblle do
   describe 'version' do
     it 'is a version string' do
-      Treblle::VERSION.must_match(/\d+\.\d+\.\d+/)
+      expect(Treblle::VERSION).to match(/\d+\.\d+\.\d+/)
     end
   end
 end
