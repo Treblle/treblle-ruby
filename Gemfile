@@ -7,3 +7,6 @@ gemspec
 gem 'minitest'
 gem 'rails'
 gem 'rake'
+gem 'rspec'
+gem 'rubocop', require: false
+gem 'rubocop-performance', require: false
