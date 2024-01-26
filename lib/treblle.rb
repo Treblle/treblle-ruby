@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 require 'treblle/middleware'
-require 'treblle/interfaces/configuration'
+require 'treblle/configuration'
 
 # Treblle middleware for request interception and gathering.
 module Treblle
   class << self
     def configuration
-      @configuration ||= Interfaces::Configuration.new
+      @configuration ||= Configuration.new
     end
 
     def configure

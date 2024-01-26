@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Treblle
-  module Utility
+  module Utils
     class HashSanitizer
       class << self
         def sanitize(hash, sensitive_attrs)

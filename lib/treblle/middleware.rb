@@ -38,10 +38,10 @@ module Treblle
     end
 
     def handle_monitoring(env, response, started_at, exception: nil)
-      payload = PayloadBuilder.new(env:, response:, started_at:, exception:).call
-      Dispatcher.new(payload:).call
+      payload = PayloadBuilder.new(env: env, response: response, started_at: started_at, exception: exception).call
+      Dispatcher.new(payload: payload).call
     rescue StandardError => e
-      Rails.logger.error(e.message)
+      Rails.logger.error(e.message) # todo: log error
     end
 
     def should_monitor?(env)

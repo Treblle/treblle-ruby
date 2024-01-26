@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 require 'json'
-require 'active_support/json'
+require 'active_support'
 
 module Treblle
-  module Interfaces
+  module Context
     class Response
       def initialize(response)
         @status, @headers, @response = response || [500, {}, {}]

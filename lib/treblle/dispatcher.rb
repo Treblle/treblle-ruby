@@ -26,6 +26,7 @@ module Treblle
 
     attr_reader :payload, :uri, :configuration
 
+    # TODO: handle errors and logs inside of the thread
     def send_payload_to_treblle
       Thread.new do
         response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
