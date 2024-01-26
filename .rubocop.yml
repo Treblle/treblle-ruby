@@ -3,6 +3,7 @@ AllCops:
   NewCops: enable
   Exclude:
     - "treblle-ruby.gemspec"
+    - "Gemfile.lock"
 
 require:
   - rubocop-performance
