@@ -1,10 +1,13 @@
 require 'rspec'
-require 'treblle/context/response'
+require 'pry'
+require 'treblle/response_builder'
 
-RSpec.describe Treblle::Context::Response do
-  subject { described_class.new(response_data) }
+RSpec.describe Treblle::ResponseBuilder do
+  subject { described_class.new(response_data).build }
   context 'with OK response' do
-    let(:response_data) { [200, { 'Content-Type' => 'application/json' }, { 'key' => 'value' }] }
+    let(:response_data) do
+      [200, { 'Content-Type' => 'application/json' }, '{"foo": {"bar": 1, "baz": 2}}']
+    end
 
     it 'initializes with valid response data' do
       expect(subject.status).to eq(200)

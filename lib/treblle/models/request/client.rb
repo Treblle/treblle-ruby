@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Treblle
-  module Context
-    module RequestModule
+  module Models
+    class Request
       class Client
         def initialize(request)
           @ip = request.ip

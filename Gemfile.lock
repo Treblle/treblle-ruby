@@ -65,15 +65,20 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
+    addressable (2.8.6)
+      public_suffix (>= 2.0.2, < 6.0)
     ast (2.4.2)
     builder (3.2.4)
     concurrent-ruby (1.2.3)
+    crack (0.4.5)
+      rexml
     crass (1.0.6)
     date (3.3.4)
     diff-lcs (1.5.0)
     erubi (1.12.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    hashdiff (1.1.0)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
     json (2.7.1)
@@ -108,6 +113,7 @@ GEM
     parser (3.3.0.5)
       ast (~> 2.4.1)
       racc
+    public_suffix (5.0.4)
     racc (1.7.3)
     rack (2.2.8)
     rack-test (2.1.0)
@@ -186,6 +192,10 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
+    webmock (3.19.1)
+      addressable (>= 2.8.0)
+      crack (>= 0.3.2)
+      hashdiff (>= 0.4.0, < 2.0.0)
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
@@ -202,6 +212,7 @@ DEPENDENCIES
   rubocop
   rubocop-performance
   treblle!
+  webmock
 
 BUNDLED WITH
    2.3.27

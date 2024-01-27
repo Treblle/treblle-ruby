@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
+require 'pry'
 require 'rspec'
-require 'treblle/context/request'
+require 'treblle/request_builder'
 
-RSpec.describe Treblle::Context::Request do
+RSpec.describe Treblle::RequestBuilder do
   context 'GET request' do
-    subject { described_class.new(env) }
+    subject { described_class.new(env).build }
 
     let(:path) { '/api/some_endpoint' }
     let(:query_params) { { 'thing' => '123' } }
@@ -35,7 +36,7 @@ RSpec.describe Treblle::Context::Request do
           params: { thing: 123 }
         )
 
-        result = subject.new(env)
+        result = subject.new(env).build
 
         expect(result.body).to eq('thing' => '123')
       end
@@ -55,11 +56,11 @@ RSpec.describe Treblle::Context::Request do
             }
           )
 
-          result = subject.new(env)
+          result = subject.new(env).build
 
-          expect(result.body['file'].headers).to match(/content-disposition: form-data/)
-          expect(result.body['file'].headers).to match(/content-type: binary/)
-          expect(result.body['file'].headers).to match(/content-length: 10485760/)
+          expect(result.body['file'].headers).to match(/Content-Disposition: form-data/)
+          expect(result.body['file'].headers).to match(/Content-Type: binary/)
+          expect(result.body['file'].headers).to match(/Content-Length: 10485760/)
         end
       end
 
@@ -71,7 +72,7 @@ RSpec.describe Treblle::Context::Request do
             input: { something: 'everything' }.to_json
           )
 
-          result = subject.new(env)
+          result = subject.new(env).build
 
           expect(result.body).to eq '{"something":"everything"}'
           expect(result.body.encoding).to eq Encoding::UTF_8
@@ -82,7 +83,7 @@ RSpec.describe Treblle::Context::Request do
   end
 
   context 'stores request headers' do
-    subject { described_class.new(env) }
+    subject { described_class.new(env).build }
 
     let(:path) { '/api/some_endpoint' }
     let(:env) { Rack::MockRequest.env_for(path, {}) }
@@ -121,6 +122,7 @@ RSpec.describe Treblle::Context::Request do
 
     let(:path) { '/api/some_endpoint' }
     let(:env) { Rack::MockRequest.env_for(path, {}) }
+    let(:request) { ActionDispatch::Request.new(env) }
 
     context '#normalize_header' do
       it 'replaces _ with - and removes HTTP_ prefix' do
@@ -128,11 +130,11 @@ RSpec.describe Treblle::Context::Request do
       end
     end
 
-    context '#request_headers' do
+    context '#get_headers' do
       it 'returns a hash of headers' do
         env.merge!('HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9')
 
-        expect(subject.send(:request_headers)).to include({ 'ACCEPT-LANGUAGE' => 'en-US,en;q=0.9' })
+        expect(subject.send(:get_headers, request)).to include({ 'ACCEPT-LANGUAGE' => 'en-US,en;q=0.9' })
       end
     end
 

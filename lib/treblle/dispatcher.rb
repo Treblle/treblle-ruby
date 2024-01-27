@@ -14,7 +14,7 @@ module Treblle
 
     def initialize(payload:, configuration: Treblle.configuration)
       @payload = payload
-      @uri = URI(TREBLLE_URIS.sample)
+      @uri = get_uri
       @configuration = configuration
     end
 
@@ -26,13 +26,16 @@ module Treblle
 
     attr_reader :payload, :uri, :configuration
 
-    # TODO: handle errors and logs inside of the thread
+    def get_uri
+      URI(TREBLLE_URIS.sample)
+    end
+
     def send_payload_to_treblle
       Thread.new do
         response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
           http.request(build_request)
         end
-        puts response.body
+        Rails.logger.info("Successfully sent to Treblle: #{response.body}")
       end
     end
 

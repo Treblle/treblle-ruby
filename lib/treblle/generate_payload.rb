@@ -1,24 +1,17 @@
 # frozen_string_literal: true
 
-require 'json'
-require 'socket'
 require 'treblle/version'
-require 'treblle/context/request'
-require 'treblle/context/response'
 require 'treblle/utils/hash_sanitizer'
 
-# Gathers and builds body payload to be sent to Treblle in json format.
-# Hides sensitive data based on default values and additional ones provided via env variable.
 module Treblle
-  class PayloadBuilder
+  class GeneratePayload
     TREBLLE_VERSION = '0.6'
     SDK_LANG = 'ruby'
 
-    def initialize(env:, response:, started_at:, exception: nil, configuration: Treblle.configuration)
+    def initialize(request:, response:, started_at:, exception: nil, configuration: Treblle.configuration)
+      @request = request
+      @response = response
       @started_at = started_at
-      @ended_at = Time.current
-      @request = Context::Request.new(env)
-      @response = Context::Response.new(response)
       @exception = exception
       @configuration = configuration
     end
@@ -29,10 +22,18 @@ module Treblle
 
     private
 
-    attr_accessor :request, :response, :configuration, :started_at, :ended_at, :exception
+    attr_accessor :request, :response, :started_at, :configuration, :exception
 
     def sanitize(body)
       Utils::HashSanitizer.sanitize(body, configuration.sensitive_attrs)
+    end
+
+    def timestamp
+      started_at.to_formatted_s(:db)
+    end
+
+    def load_time
+      Time.current - started_at
     end
 
     def payload
@@ -44,7 +45,7 @@ module Treblle
         data: {
           server: {
             ip: request.server.remote_addr,
-            timezone: Time.zone.name,
+            timezone: request.server.timezone,
             software: request.server.software,
             signature: '',
             protocol: request.server.protocol,
@@ -58,7 +59,7 @@ module Treblle
             version: RUBY_VERSION
           },
           request: {
-            timestamp: started_at.to_formatted_s(:db),
+            timestamp: timestamp,
             ip: request.client.ip,
             url: request.client.url,
             user_agent: request.client.user_agent,
@@ -70,7 +71,7 @@ module Treblle
             headers: response.headers,
             code: response.status,
             size: response.size,
-            load_time: Time.current - started_at,
+            load_time: load_time,
             body: sanitize(response.body),
             errors: build_error_object
           }

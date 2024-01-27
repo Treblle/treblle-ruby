@@ -22,10 +22,11 @@ module Treblle
 
     def initialize(api_key: nil, project_id: nil)
       @restricted_endpoints = []
-      @sensitive_attrs = DEFAULT_SENSITIVE_ATTRS
       @app_version = nil
       @api_key = api_key
       @project_id = project_id
+
+      @sensitive_attrs = DEFAULT_SENSITIVE_ATTRS
     end
 
     def valid?
@@ -36,8 +37,8 @@ module Treblle
       valid? && !restricted_endpoint?(request_url) && request_url.start_with?('/api/')
     end
 
-    def sensitive_attrs=(value)
-      @sensitive_attrs = value ? DEFAULT_SENSITIVE_ATTRS + value : DEFAULT_SENSITIVE_ATTRS
+    def sensitive_attrs=(attributes)
+      @sensitive_attrs = attributes ? DEFAULT_SENSITIVE_ATTRS + attributes : DEFAULT_SENSITIVE_ATTRS
     end
 
     private

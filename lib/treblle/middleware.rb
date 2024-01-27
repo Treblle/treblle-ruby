@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-require 'treblle/payload_builder'
 require 'treblle/dispatcher'
+require 'treblle/request_builder'
+require 'treblle/response_builder'
+require 'treblle/generate_payload'
 
 module Treblle
   class Middleware
@@ -27,21 +29,24 @@ module Treblle
 
       begin
         response = @app.call(env)
-      rescue StandardError => e
+      rescue Exception => e
         handle_monitoring(env, response, started_at, e)
         raise e
       end
 
-      handle_monitoring(env, response, started_at) unless env['rack.exception']
+      handle_monitoring(env, response, started_at)
 
       response
     end
 
-    def handle_monitoring(env, response, started_at, exception: nil)
-      payload = PayloadBuilder.new(env: env, response: response, started_at: started_at, exception: exception).call
+    def handle_monitoring(env, rack_response, started_at, exception: nil)
+      request = RequestBuilder.new(env).build
+      response = ResponseBuilder.new(rack_response).build
+      payload = GeneratePayload.new(request: request, response: response, started_at: started_at,
+        exception: exception).call
       Dispatcher.new(payload: payload).call
     rescue StandardError => e
-      Rails.logger.error(e.message) # todo: log error
+      Rails.logger.error("Treblle monitoring failed due to: #{e.message}")
     end
 
     def should_monitor?(env)
