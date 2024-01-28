@@ -1,5 +1,4 @@
 require 'rspec'
-require 'pry'
 require 'treblle/response_builder'
 
 RSpec.describe Treblle::ResponseBuilder do
