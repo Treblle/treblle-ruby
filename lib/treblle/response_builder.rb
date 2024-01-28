@@ -26,12 +26,14 @@ module Treblle
       response.status = status
       response.headers = headers
       response.body = parse_body(response_data)
-      response.size = calculate_size(response.body)
+      response.size = calculate_size(response.body, response.headers)
       response
     end
 
-    def calculate_size(body)
-      body ? ActiveSupport::JSON.encode(body).size : 0
+    def calculate_size(body, headers)
+      return 0 unless body
+
+      headers.fetch('Content-Length', nil) || ActiveSupport::JSON.encode(body).size
     end
 
     def parse_body(response_data)

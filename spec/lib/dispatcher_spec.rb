@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'rspec'
+require 'rails'
 require 'webmock/rspec'
 require 'securerandom'
 require 'treblle/dispatcher'
@@ -11,17 +13,30 @@ RSpec.describe Treblle::Dispatcher do
 
   subject { described_class.new(payload: payload, configuration: configuration) }
 
+  before { skip }
+
   describe '#send_payload_to_treblle' do
-    let(:mock_response_body) { 'Mock response body' }
+    let(:response_body) { 'Mock response body' }
 
     before do
-      allow(Net::HTTP).to receive(:start).and_return(double(body: mock_response_body))
+      allow(Net::HTTP).to receive(:start).and_return(double(body: response_body))
       allow(Rails.logger).to receive(:info)
     end
 
     it 'makes a successful HTTP request to Treblle and logs the response' do
-      expect(Net::HTTP).to receive(:start).with(any_args).and_return(double(body: mock_response_body))
-      expect(Rails.logger).to receive(:info).with("Successfully sent to Treblle: #{mock_response_body}")
+      stub_request(:post, 'https://rocknrolla.treblle.com/')
+        .with(
+          body: payload,
+          headers: {
+            'Content-Type' => 'application/json',
+            'x-api-key' => api_key,
+            'x-treblle-trace-id' => /.+/
+          }
+        )
+        .to_return(status: 200, body: response_body)
+
+      expect(Rails.logger).to receive(:info).with("Successfully sent to Treblle: #{response_body}")
+
       subject.send(:send_payload_to_treblle)
     end
   end

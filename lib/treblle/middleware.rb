@@ -25,7 +25,7 @@ module Treblle
     attr_reader :configuration
 
     def call_with_treblle_monitoring(env)
-      started_at = Time.current
+      started_at = Time.now
 
       begin
         response = @app.call(env)
@@ -44,6 +44,7 @@ module Treblle
       response = ResponseBuilder.new(rack_response).build
       payload = GeneratePayload.new(request: request, response: response, started_at: started_at,
         exception: exception).call
+
       Dispatcher.new(payload: payload).call
     rescue StandardError => e
       Rails.logger.error("Treblle monitoring failed due to: #{e.message}")

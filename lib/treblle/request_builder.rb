@@ -12,6 +12,7 @@ module Treblle
     HEADER_PREFIXES = %w[
       HTTP AUTHORIZATION QUERY CONTENT REMOTE
       REQUEST SERVER ACCEPT USER HOST X PATH
+      VARY REFERRER
     ].freeze
 
     def initialize(rack_env)
@@ -34,7 +35,6 @@ module Treblle
       request.server = Models::Request::Server.new(request_metadata)
       request.client = Models::Request::Client.new(request_metadata)
       request.method = request_metadata.method
-
       request.headers = get_headers(request_metadata)
       request.body = get_body(request_metadata)
 

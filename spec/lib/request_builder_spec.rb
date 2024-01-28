@@ -57,9 +57,9 @@ RSpec.describe Treblle::RequestBuilder do
 
           result = subject.new(env).build
 
-          expect(result.body['file'].headers).to match(/Content-Disposition: form-data/)
-          expect(result.body['file'].headers).to match(/Content-Type: binary/)
-          expect(result.body['file'].headers).to match(/Content-Length: 10485760/)
+          expect(result.body['file'].headers).to match(/content-disposition: form-data/)
+          expect(result.body['file'].headers).to match(/content-type: binary/)
+          expect(result.body['file'].headers).to match(/content-length: 10485760/)
         end
       end
 
