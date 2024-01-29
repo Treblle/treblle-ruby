@@ -7,6 +7,14 @@ RSpec.describe Treblle::Utils::HashSanitizer do
   subject { described_class.sanitize(input_hash, sensitive_attributes) }
   let(:sensitive_attributes) { %w[password credit_card] }
 
+  context 'when given hash is nil' do
+    let(:input_hash) { nil }
+
+    it 'returns an empty hash' do
+      expect(subject).to eq({})
+    end
+  end
+
   context 'when given an empty hash' do
     let(:input_hash) { {} }
 

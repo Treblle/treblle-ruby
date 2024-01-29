@@ -5,7 +5,7 @@ module Treblle
     class HashSanitizer
       class << self
         def sanitize(hash, sensitive_attrs)
-          return {} if hash&.empty?
+          return {} if hash.nil? || hash.empty?
 
           hash.each do |k, v|
             value = v || k
