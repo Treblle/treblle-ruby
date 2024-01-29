@@ -22,7 +22,7 @@ module Treblle
 
     private
 
-    attr_accessor :request, :response, :started_at, :configuration, :exception
+    attr_reader :request, :response, :started_at, :configuration, :exception
 
     def sanitize(body)
       Utils::HashSanitizer.sanitize(body, configuration.sensitive_attrs)

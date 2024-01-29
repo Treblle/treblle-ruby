@@ -4,9 +4,12 @@ require 'treblle/dispatcher'
 require 'treblle/request_builder'
 require 'treblle/response_builder'
 require 'treblle/generate_payload'
+require 'treblle/logging'
 
 module Treblle
   class Middleware
+    include Logging
+
     def initialize(app, configuration: Treblle.configuration)
       @app = app
       @configuration = configuration
@@ -47,7 +50,7 @@ module Treblle
 
       Dispatcher.new(payload: payload).call
     rescue StandardError => e
-      Rails.logger.error("Treblle monitoring failed due to: #{e.message}")
+      log_error(e.message)
     end
 
     def should_monitor?(env)

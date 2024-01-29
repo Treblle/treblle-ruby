@@ -7,73 +7,68 @@ require 'securerandom'
 require 'treblle/dispatcher'
 
 RSpec.describe Treblle::Dispatcher do
-  let(:payload) { '{"key": "value"}' }
-  let(:api_key) { 'test_api_key' }
-  let(:configuration) { instance_double('Treblle::Configuration', api_key: api_key) }
-
   subject { described_class.new(payload: payload, configuration: configuration) }
 
-  before { skip }
+  let(:configuration) { instance_double('Treblle::Configuration', api_key: api_key) }
+  let(:api_key) { 'test-api-key' }
+  let(:payload) { { message: 'OK' }.to_json }
+  let(:fake_uuid) { 'fake-uuid' }
+  let(:treblle_url) { 'https://rocknrolla.treblle.com' }
 
-  describe '#send_payload_to_treblle' do
-    let(:response_body) { 'Mock response body' }
-
-    before do
-      allow(Net::HTTP).to receive(:start).and_return(double(body: response_body))
-      allow(Rails.logger).to receive(:info)
-    end
-
-    it 'makes a successful HTTP request to Treblle and logs the response' do
-      stub_request(:post, 'https://rocknrolla.treblle.com/')
-        .with(
-          body: payload,
-          headers: {
-            'Content-Type' => 'application/json',
-            'x-api-key' => api_key,
-            'x-treblle-trace-id' => /.+/
-          }
-        )
-        .to_return(status: 200, body: response_body)
-
-      expect(Rails.logger).to receive(:info).with("Successfully sent to Treblle: #{response_body}")
-
-      subject.send(:send_payload_to_treblle)
-    end
-  end
-
-  describe '#build_request' do
-    let(:fake_uuid) { 'fake-uuid' }
-
+  context '#call' do
     before do
       allow(SecureRandom).to receive(:uuid).and_return(fake_uuid)
+      allow_any_instance_of(Treblle::Dispatcher).to receive(:get_uri)
+        .and_return(URI(treblle_url))
     end
 
-    it 'builds a Net::HTTP::Post request with the correct headers and payload' do
-      request = subject.send(:build_request)
+    context 'when request is valid' do
+      it 'makes a successful HTTP request to Treblle and logs the response' do
+        stub_request(:post, treblle_url)
+          .with(
+            body: payload,
+            headers: {
+              'Content-Type' => 'application/json',
+              'x-api-key' => api_key,
+              'x-treblle-trace-id' => fake_uuid
+            }
+          ).to_return(status: 200, body: payload)
 
-      expect(request).to be_a(Net::HTTP::Post)
-      expect(request['Content-Type']).to eq('application/json')
-      expect(request['x-api-key']).to eq(api_key)
-      expect(request['x-treblle-trace-id']).to eq(fake_uuid)
-      expect(request.body).to eq(payload)
+        expect(subject.logger).to receive(:info).with(/Successfully sent to Treblle/)
+
+        subject.call.join
+      end
     end
-  end
 
-  describe 'HTTP request integration test' do
-    it 'successfully sends the payload to a mock Treblle endpoint' do
-      stub_request(:post, /treblle\.com/)
-        .to_return(status: 200, body: 'Mock Treblle response')
+    context 'when the Treblle request returns a response with status >= 400' do
+      it 'logs failed monitoring' do
+        stub_request(:post, treblle_url)
+          .to_return(status: 400, body: 'Internal Server Error')
 
-      subject.call
+        expect(subject.logger).to receive(:error).with(/Treblle monitoring failed/)
 
-      expect(WebMock).to have_requested(:post, /treblle\.com/).with(
-        headers: {
-          'Content-Type' => 'application/json',
-          'x-api-key' => api_key,
-          'x-treblle-trace-id' => /.+/
-        },
-        body: payload
-      ).once
+        subject.call.join
+      end
+    end
+
+    context 'when the Treblle request times out' do
+      it 'logs an error' do
+        stub_request(:post, 'https://rocknrolla.treblle.com/').to_timeout
+
+        expect(subject.logger).to receive(:error).with(/Treblle monitoring failed/)
+
+        subject.call.join
+      end
+    end
+
+    context 'when the Treblle request fails' do
+      it 'logs an error' do
+        stub_request(:post, 'https://rocknrolla.treblle.com/').to_raise(StandardError)
+
+        expect(subject.logger).to receive(:error).with(/Treblle monitoring failed/)
+
+        subject.call.join
+      end
     end
   end
 end

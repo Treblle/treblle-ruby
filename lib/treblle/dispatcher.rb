@@ -3,9 +3,12 @@
 require 'uri'
 require 'net/http'
 require 'securerandom'
+require 'treblle/logging'
 
 module Treblle
   class Dispatcher
+    include Logging
+
     TREBLLE_URIS = %w[
       https://rocknrolla.treblle.com
       https://punisher.treblle.com
@@ -32,10 +35,19 @@ module Treblle
 
     def send_payload_to_treblle
       Thread.new do
-        response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-          http.request(build_request)
+        begin
+          response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+            http.request(build_request)
+          end
+
+          if response.code.to_i >= 400
+            log_error(response.body)
+          else
+            log_success(response.body)
+          end
+        rescue StandardError => e
+          log_error(e.message)
         end
-        Rails.logger.info("Successfully sent to Treblle: #{response.body}")
       end
     end
 
