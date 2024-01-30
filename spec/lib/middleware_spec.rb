@@ -1,58 +1,206 @@
-# frozen_string_literal: true
-
+require 'rspec'
 require 'treblle/middleware'
+require 'treblle/configuration'
+require 'webmock/rspec'
 
 RSpec.describe Treblle::Middleware do
-  subject { described_class.new(app, configuration: configuration) }
+  subject { described_class.new(app) }
 
-  let(:configuration) { instance_double(Treblle::Configuration, valid?: true, monitoring_enabled?: true) }
+  let(:treblle_url) { 'https://rocknrolla.treblle.com' }
+  let(:request_url) { '/api/some_endpoint' }
 
   before do
-    skip
+    Treblle.configure do |config|
+      config.api_key = 'your_api_key'
+      config.project_id = 'project_id'
+    end
+
+    allow_any_instance_of(Treblle::Dispatcher).to receive(:get_uri)
+      .and_return(URI(treblle_url))
   end
 
-  context 'when request is valid and treblle is configured' do
-    let(:rack_env) { { "key" => "value" } }
-    let(:app) { ->(_env) { ['response', {}, rack_env] } }
-
-    it "calls the upstream rack app with the environment" do
-      response = subject.call(rack_env)
-
-      expect(response).to eq(['response', {}, rack_env])
+  context 'when app request is GET' do
+    let(:app) { ->(env) { [200, env, 'OK'] } }
+    let(:query_params) { { 'thing' => '123' } }
+    let(:env) do
+      Rack::MockRequest.env_for(request_url, {
+        method: 'GET',
+        params: query_params,
+        'QUERY_STRING' => Rack::Utils.build_query(query_params)
+      })
     end
 
-    it 'sends monitoring data to treblle' do
-      expect(subject).to have_requested(:post, "/treblle.com/")
+    it 'makes a successful HTTP request to Treblle and logs the response' do
+      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+
+      status, headers, response_body = subject.call(env)
+
+      expect(status).to eq(200)
+      expect(response_body).to eq('OK')
+      expect(headers['PATH_INFO']).to eq(request_url)
+      expect(headers['QUERY_STRING']).to eq('thing=123')
+      expect(headers['REQUEST_METHOD']).to eq('GET')
     end
   end
 
-  context 'when exception is raised in treblle middleware' do
-    it 'returns original rack response' do
+  context 'when app request is POST' do
+    let(:app) { ->(env) { [200, env, 'OK'] } }
+    let(:env) do
+      Rack::MockRequest.env_for(
+        treblle_url,
+        method: 'POST',
+        params: { post: { content: "lorem ipsum body", title: "lorem ipsum title" } }
+      )
     end
 
-    it "does not monitor data to" do
+    it 'makes a successful HTTP request to Treblle and logs the response' do
+      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+
+      status, headers, response_body = subject.call(env)
+
+      expect(status).to be 200
+      expect(response_body).to eq('OK')
+      expect(headers['REQUEST_METHOD']).to eq('POST')
     end
   end
 
-  context 'when exception is raised in rack middleware' do
-    subject { Treblle::Middleware.new(app, configuration: configuration) }
-
-    let(:rack_env) { { "key" => "value" } }
-    let(:exception) { StandardError.new("It crashed") }
-    let(:app) { ->(_env) { raise exception } }
-
-    it 'returns original rack response' do
-      response = subject.call(rack_env)
-
-      expect(response).to eq(['response', {}, rack_env])
+  context 'when app request is DELETE' do
+    let(:app) { ->(env) { [200, env, 'OK'] } }
+    let(:env) do
+      Rack::MockRequest.env_for(
+        treblle_url,
+        method: 'DELETE'
+      )
     end
 
-    it 're-rase exception' do
-      expect { subject.call(rack_env) }.to raise_error(StandardError)
+    it 'makes a successful HTTP request to Treblle and logs the response' do
+      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+
+      status, headers, response_body = subject.call(env)
+
+      expect(status).to be 200
+      expect(response_body).to eq('OK')
+      expect(headers['REQUEST_METHOD']).to eq('DELETE')
+    end
+  end
+
+  context 'when app request is PUT' do
+    let(:app) { ->(env) { [200, env, 'OK'] } }
+    let(:env) do
+      Rack::MockRequest.env_for(
+        treblle_url,
+        method: 'PUT'
+      )
     end
 
-    it 'sends monitoring data to treblle' do
-      expect(subject).to have_requested(:post, "/treblle.com/")
+    it 'makes a successful HTTP request to Treblle and logs the response' do
+      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+
+      status, headers, response_body = subject.call(env)
+
+      expect(status).to be 200
+      expect(response_body).to eq('OK')
+      expect(headers['REQUEST_METHOD']).to eq('PUT')
+    end
+  end
+
+  context 'when app request is redirect' do
+    let(:app) { ->(env) { [301, env, 'OK'] } }
+    let(:env) do
+      Rack::MockRequest.env_for(
+        treblle_url,
+        method: 'GET'
+      )
+    end
+
+    it 'makes a successful HTTP request to Treblle and logs the response' do
+      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+
+      status, headers, response_body = subject.call(env)
+
+      expect(status).to be 301
+      expect(response_body).to eq('OK')
+      expect(headers['REQUEST_METHOD']).to eq('GET')
+    end
+  end
+
+  context 'when app request is not found' do
+    let(:app) { ->(env) { [404, env, 'OK'] } }
+    let(:env) do
+      Rack::MockRequest.env_for(
+        treblle_url,
+        method: 'GET'
+      )
+    end
+
+    it 'makes a successful HTTP request to Treblle and logs the response' do
+      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+
+      status, headers, response_body = subject.call(env)
+
+      expect(status).to be 404
+      expect(response_body).to eq('OK')
+      expect(headers['REQUEST_METHOD']).to eq('GET')
+    end
+  end
+
+  context 'when app request is unauthorized' do
+    let(:app) { ->(env) { [401, env, 'OK'] } }
+    let(:env) do
+      Rack::MockRequest.env_for(
+        treblle_url,
+        method: 'GET'
+      )
+    end
+
+    it 'makes a successful HTTP request to Treblle and logs the response' do
+      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+
+      status, headers, response_body = subject.call(env)
+
+      expect(status).to be 401
+      expect(response_body).to eq('OK')
+      expect(headers['REQUEST_METHOD']).to eq('GET')
+    end
+  end
+
+  context 'when app request is forbidden' do
+    let(:app) { ->(env) { [403, env, 'OK'] } }
+    let(:env) do
+      Rack::MockRequest.env_for(
+        treblle_url,
+        method: 'GET'
+      )
+    end
+
+    it 'makes a successful HTTP request to Treblle and logs the response' do
+      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+
+      status, headers, response_body = subject.call(env)
+
+      expect(status).to be 403
+      expect(response_body).to eq('OK')
+      expect(headers['REQUEST_METHOD']).to eq('GET')
+    end
+  end
+
+  context 'when app request is server error' do
+    let(:app) { ->(env) { [500, env, 'OK'] } }
+    let(:env) do
+      Rack::MockRequest.env_for(
+        treblle_url,
+        method: 'GET'
+      )
+    end
+
+    it 'makes a successful HTTP request to Treblle and logs the response' do
+      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+
+      status, headers, response_body = subject.call(env)
+
+      expect(status).to be 500
+      expect(response_body).to eq('OK')
+      expect(headers['REQUEST_METHOD']).to eq('GET')
     end
   end
 end

@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
+require 'logger'
+
 module Treblle
   module Logging
     def logger
-      ::Rails.logger
+      @logger ||= Logger.new($stdout)
     end
 
     def log_error(message)

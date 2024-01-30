@@ -7,6 +7,7 @@ module Treblle
   class GeneratePayload
     TREBLLE_VERSION = '0.6'
     SDK_LANG = 'ruby'
+    TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
     def initialize(request:, response:, started_at:, exception: nil, configuration: Treblle.configuration)
       @request = request
@@ -29,11 +30,11 @@ module Treblle
     end
 
     def timestamp
-      started_at.to_formatted_s(:db)
+      started_at.strftime(TIME_FORMAT)
     end
 
     def load_time
-      Time.current - started_at
+      (Time.now - started_at).strftime(TIME_FORMAT)
     end
 
     def payload

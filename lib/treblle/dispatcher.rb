@@ -36,9 +36,7 @@ module Treblle
     def send_payload_to_treblle
       Thread.new do
         begin
-          response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-            http.request(build_request)
-          end
+          response = make_http_request
 
           if response.code.to_i >= 400
             log_error(response.body)
@@ -48,6 +46,19 @@ module Treblle
         rescue StandardError => e
           log_error(e.message)
         end
+      end
+    end
+
+    def make_http_request
+      http = Net::HTTP.new(uri.hostname, uri.port)
+      http.use_ssl = true
+      http.read_timeout = 2
+      http.open_timeout = 2
+
+      request = build_request
+
+      http.start do |http_instance|
+        http_instance.request(request)
       end
     end
 

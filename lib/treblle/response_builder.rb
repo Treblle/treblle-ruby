@@ -37,7 +37,7 @@ module Treblle
     end
 
     def parse_body(response_data)
-      return nil unless response_data&.respond_to?(:body)
+      return nil unless response_data.respond_to?(:body)
 
       JSON.parse(response_data.body)
     end

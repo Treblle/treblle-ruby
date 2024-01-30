@@ -5,6 +5,7 @@ require 'treblle/request_builder'
 require 'treblle/response_builder'
 require 'treblle/generate_payload'
 require 'treblle/logging'
+require 'treblle'
 
 module Treblle
   class Middleware

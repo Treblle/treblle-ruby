@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rspec'
-require 'rails'
 require 'webmock/rspec'
 require 'securerandom'
 require 'treblle/dispatcher'
