@@ -4,79 +4,50 @@ require 'treblle/response_builder'
 RSpec.describe Treblle::ResponseBuilder do
   subject { described_class.new(rack_response).build }
 
-  before { skip }
-  let(:rack_response) do
-    Rack::MockResponse.new(
-      200,
-      {
-        'x-frame-options' => 'SAMEORIGIN',
-        'x-xss-protection' => '0',
-        'x-content-type-options' => 'nosniff',
-        'x-permitted-cross-domain-policies' => 'none',
-        'referrer-policy' => 'strict-origin-when-cross-origin',
-        'content-type' => 'application/json; charset=utf-8',
-        'vary' => 'Accept'
-      },
-      '{[{"id":102,"email":"email1@test.com"}]}'
-    )
+  let(:app) do
+    lambda { |env|
+      [200, env, '{"result": "success"}']
+    }
   end
-  let(:asd) do
-    [
-      200,
-      {
-        'x-frame-options' => 'SAMEORIGIN',
-        'x-xss-protection' => '0',
-        'x-content-type-options' => 'nosniff',
-        'x-permitted-cross-domain-policies' => 'none',
-        'referrer-policy' => 'strict-origin-when-cross-origin',
-        'content-type' => 'application/json; charset=utf-8',
-        'vary' => 'Accept'
-      },
-      ActionDispatch::Response::RackBody.new(
-        ActionDispatch::Response.new(
-          200,
-          {
-            'x-frame-options' => 'SAMEORIGIN',
-            'x-xss-protection' => '0',
-            'x-content-type-options' => 'nosniff',
-            'x-permitted-cross-domain-policies' => 'none',
-            'referrer-policy' => 'strict-origin-when-cross-origin',
-            'content-type' => 'application/json; charset=utf-8',
-            'vary' => 'Accept'
-          },
-          '[{"id":102,"email":"email1@test.com"}]'
-        )
-      )
-    ]
+  let(:response) { Rack::MockRequest.new(app).get('example/api') }
+  let(:env) { Rack::MockRequest.env_for('example/api') }
+  let(:rack_response) { [200, response.headers, response] }
+
+  context 'with a 200 response' do
+    it 'stores status' do
+      expect(subject.status).to eq(200)
+    end
+
+    it 'stores headers' do
+      expect(subject.headers['path_info']).to eq('/example/api')
+    end
+
+    it 'stores body' do
+      expect(subject.body).to eq({ 'result' => 'success' })
+    end
+
+    it 'stores body' do
+      expect(subject.size).to eq(20)
+    end
   end
 
-  it 'builds a Models::Response object with the correct attributes' do
-    expect(subject).to be_an_instance_of(Treblle::Models::Response)
-    expect(subject.status).to eq(200)
-    expect(subject.headers).to eq(
-      'x-frame-options' => 'SAMEORIGIN',
-      'x-xss-protection' => '0',
-      'x-content-type-options' => 'nosniff',
-      'x-permitted-cross-domain-policies' => 'none',
-      'referrer-policy' => 'strict-origin-when-cross-origin',
-      'content-type' => 'application/json; charset=utf-8',
-      'vary' => 'Accept'
-    )
-    expect(subject.body).to eq(
-      [
-        { 'id' => 102, 'email' => 'email1@test.com' }
-      ]
-    )
-  end
+  context 'with a 500 response' do
+    let(:rack_response) { [500, [], nil] }
 
-  context 'when @app.call fails and rack_response is not present' do
-    let(:rack_response) { nil }
-
-    it 'builds a Models::Response object with default values' do
-      expect(subject).to be_an_instance_of(Treblle::Models::Response)
+    it 'stores status' do
       expect(subject.status).to eq(500)
+    end
+
+    it 'stores headers' do
       expect(subject.headers).to eq([])
-      expect(subject.body).to be_nil
+    end
+
+    it 'stores body' do
+      expect(subject.body).to eq(nil)
+    end
+
+    it 'stores body' do
+      expect(subject.size).to eq(0)
     end
   end
 end

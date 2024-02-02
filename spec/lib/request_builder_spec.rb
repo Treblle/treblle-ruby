@@ -129,7 +129,7 @@ RSpec.describe Treblle::RequestBuilder do
       end
     end
 
-    context '#get_headers' do
+    describe '#get_headers' do
       it 'returns a hash of headers' do
         env.merge!('HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9')
 
@@ -137,7 +137,7 @@ RSpec.describe Treblle::RequestBuilder do
       end
     end
 
-    context '#header_to_include?' do
+    describe '#header_to_include?' do
       it 'returns true for headers with valid prefixes' do
         valid_headers = %w[HTTP_ACCEPT HTTP_AUTHORIZATION QUERY_STRING CONTENT_TYPE REQUEST_METHOD SERVER_NAME
                            SERVER_SOFTWARE HTTP_USER_AGENT]

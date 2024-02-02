@@ -55,10 +55,8 @@ module Treblle
       http.read_timeout = 2
       http.open_timeout = 2
 
-      request = build_request
-
       http.start do |http_instance|
-        http_instance.request(request)
+        http_instance.request(build_request)
       end
     end
 

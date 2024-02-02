@@ -17,6 +17,29 @@ RSpec.describe Treblle::Middleware do
 
     allow_any_instance_of(Treblle::Dispatcher).to receive(:get_uri)
       .and_return(URI(treblle_url))
+
+    allow(Thread).to receive(:new).and_yield
+  end
+
+  context 'when app request is valid but request to Treblle fails' do
+    let(:app) { ->(env) { [200, env, 'OK'] } }
+    let(:query_params) { { 'thing' => '123' } }
+    let(:env) do
+      Rack::MockRequest.env_for(request_url, {
+        method: 'GET',
+        params: query_params,
+        'QUERY_STRING' => Rack::Utils.build_query(query_params)
+      })
+    end
+
+    it 'fails to make valid request to Treblle' do
+      stub = stub_request(:post, treblle_url).to_return(status: 400, body: 'bad request')
+      expect(Logger).to receive_message_chain(:new, :error).with(/Treblle monitoring failed:/)
+
+      subject.call(env)
+
+      expect(stub).to have_been_requested
+    end
   end
 
   context 'when app request is GET' do
@@ -31,10 +54,12 @@ RSpec.describe Treblle::Middleware do
     end
 
     it 'makes a successful HTTP request to Treblle and logs the response' do
-      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
       status, headers, response_body = subject.call(env)
 
+      expect(stub).to have_been_requested
       expect(status).to eq(200)
       expect(response_body).to eq('OK')
       expect(headers['PATH_INFO']).to eq(request_url)
@@ -44,61 +69,67 @@ RSpec.describe Treblle::Middleware do
   end
 
   context 'when app request is POST' do
-    let(:app) { ->(env) { [200, env, 'OK'] } }
+    let(:app) { ->(env) { [201, env, 'OK'] } }
     let(:env) do
       Rack::MockRequest.env_for(
-        treblle_url,
+        request_url,
         method: 'POST',
         params: { post: { content: "lorem ipsum body", title: "lorem ipsum title" } }
       )
     end
 
     it 'makes a successful HTTP request to Treblle and logs the response' do
-      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
       status, headers, response_body = subject.call(env)
 
-      expect(status).to be 200
+      expect(stub).to have_been_requested
+      expect(status).to be 201
       expect(response_body).to eq('OK')
       expect(headers['REQUEST_METHOD']).to eq('POST')
     end
   end
 
   context 'when app request is DELETE' do
-    let(:app) { ->(env) { [200, env, 'OK'] } }
+    let(:app) { ->(env) { [204, env, ''] } }
     let(:env) do
       Rack::MockRequest.env_for(
-        treblle_url,
+        request_url,
         method: 'DELETE'
       )
     end
 
     it 'makes a successful HTTP request to Treblle and logs the response' do
-      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
       status, headers, response_body = subject.call(env)
 
-      expect(status).to be 200
-      expect(response_body).to eq('OK')
+      expect(stub).to have_been_requested
+      expect(status).to be 204
+      expect(response_body).to eq('')
       expect(headers['REQUEST_METHOD']).to eq('DELETE')
     end
   end
 
   context 'when app request is PUT' do
-    let(:app) { ->(env) { [200, env, 'OK'] } }
+    let(:app) { ->(env) { [201, env, 'OK'] } }
     let(:env) do
       Rack::MockRequest.env_for(
-        treblle_url,
+        request_url,
         method: 'PUT'
       )
     end
 
     it 'makes a successful HTTP request to Treblle and logs the response' do
-      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
       status, headers, response_body = subject.call(env)
 
-      expect(status).to be 200
+      expect(stub).to have_been_requested
+      expect(status).to be 201
       expect(response_body).to eq('OK')
       expect(headers['REQUEST_METHOD']).to eq('PUT')
     end
@@ -108,16 +139,18 @@ RSpec.describe Treblle::Middleware do
     let(:app) { ->(env) { [301, env, 'OK'] } }
     let(:env) do
       Rack::MockRequest.env_for(
-        treblle_url,
+        request_url,
         method: 'GET'
       )
     end
 
     it 'makes a successful HTTP request to Treblle and logs the response' do
-      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
       status, headers, response_body = subject.call(env)
 
+      expect(stub).to have_been_requested
       expect(status).to be 301
       expect(response_body).to eq('OK')
       expect(headers['REQUEST_METHOD']).to eq('GET')
@@ -128,16 +161,18 @@ RSpec.describe Treblle::Middleware do
     let(:app) { ->(env) { [404, env, 'OK'] } }
     let(:env) do
       Rack::MockRequest.env_for(
-        treblle_url,
+        request_url,
         method: 'GET'
       )
     end
 
     it 'makes a successful HTTP request to Treblle and logs the response' do
-      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
       status, headers, response_body = subject.call(env)
 
+      expect(stub).to have_been_requested
       expect(status).to be 404
       expect(response_body).to eq('OK')
       expect(headers['REQUEST_METHOD']).to eq('GET')
@@ -148,16 +183,18 @@ RSpec.describe Treblle::Middleware do
     let(:app) { ->(env) { [401, env, 'OK'] } }
     let(:env) do
       Rack::MockRequest.env_for(
-        treblle_url,
+        request_url,
         method: 'GET'
       )
     end
 
     it 'makes a successful HTTP request to Treblle and logs the response' do
-      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
       status, headers, response_body = subject.call(env)
 
+      expect(stub).to have_been_requested
       expect(status).to be 401
       expect(response_body).to eq('OK')
       expect(headers['REQUEST_METHOD']).to eq('GET')
@@ -168,16 +205,18 @@ RSpec.describe Treblle::Middleware do
     let(:app) { ->(env) { [403, env, 'OK'] } }
     let(:env) do
       Rack::MockRequest.env_for(
-        treblle_url,
+        request_url,
         method: 'GET'
       )
     end
 
     it 'makes a successful HTTP request to Treblle and logs the response' do
-      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
       status, headers, response_body = subject.call(env)
 
+      expect(stub).to have_been_requested
       expect(status).to be 403
       expect(response_body).to eq('OK')
       expect(headers['REQUEST_METHOD']).to eq('GET')
@@ -188,16 +227,18 @@ RSpec.describe Treblle::Middleware do
     let(:app) { ->(env) { [500, env, 'OK'] } }
     let(:env) do
       Rack::MockRequest.env_for(
-        treblle_url,
+        request_url,
         method: 'GET'
       )
     end
 
     it 'makes a successful HTTP request to Treblle and logs the response' do
-      stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
       status, headers, response_body = subject.call(env)
 
+      expect(stub).to have_been_requested
       expect(status).to be 500
       expect(response_body).to eq('OK')
       expect(headers['REQUEST_METHOD']).to eq('GET')

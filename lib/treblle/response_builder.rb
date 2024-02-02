@@ -31,9 +31,9 @@ module Treblle
     end
 
     def calculate_size(body, headers)
-      return 0 unless body
+      return 0 if body.nil?
 
-      headers.fetch('Content-Length', nil) || ActiveSupport::JSON.encode(body).size
+      headers.fetch('content-length', nil) || ActiveSupport::JSON.encode(body).size
     end
 
     def parse_body(response_data)

@@ -34,7 +34,7 @@ module Treblle
     end
 
     def load_time
-      (Time.now - started_at).strftime(TIME_FORMAT)
+      ((Time.now - started_at) * 1_000_000).round
     end
 
     def payload
@@ -52,6 +52,7 @@ module Treblle
             protocol: request.server.protocol,
             os: {
               name: request.server.os_name,
+              release: '',
               architecture: request.server.os_architecture
             }
           },
