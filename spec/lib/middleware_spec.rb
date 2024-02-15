@@ -10,11 +10,8 @@ RSpec.describe Treblle::Middleware do
   let(:request_url) { '/api/some_endpoint' }
 
   before do
-    Treblle.configure do |config|
-      config.api_key = 'your_api_key'
-      config.project_id = 'project_id'
-    end
-
+    allow_any_instance_of(Treblle::Configuration).to receive(:api_key).and_return('your_api_key')
+    allow_any_instance_of(Treblle::Configuration).to receive(:project_id).and_return('project_id')
     allow_any_instance_of(Treblle::Dispatcher).to receive(:get_uri)
       .and_return(URI(treblle_url))
 

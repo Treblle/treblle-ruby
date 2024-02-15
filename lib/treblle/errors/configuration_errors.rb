@@ -12,8 +12,8 @@ module Treblle
       end
     end
 
-    class InvalidEndpointError < ConfigurationError
-      def initialize(msg = "Invalid endpoint")
+    class MissingProjectIdError < ConfigurationError
+      def initialize(msg = "Project ID is missing")
         super(msg)
       end
     end

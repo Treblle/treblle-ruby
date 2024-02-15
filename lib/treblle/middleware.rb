@@ -44,6 +44,8 @@ module Treblle
     end
 
     def handle_monitoring(env, rack_response, started_at, exception: nil)
+      configuration.validate_credentials!
+
       request = RequestBuilder.new(env).build
       response = ResponseBuilder.new(rack_response).build
       payload = GeneratePayload.new(request: request, response: response, started_at: started_at,

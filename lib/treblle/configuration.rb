@@ -23,19 +23,11 @@ module Treblle
       :api_key, :project_id, :app_version
     attr_reader :sensitive_attrs
 
-    def initialize(api_key: nil, project_id: nil)
+    def initialize
       @restricted_endpoints = []
       @whitelisted_endpoints = '/api/'
-      @enabled_environments = ['production']
       @app_version = nil
-      @api_key = api_key
-      @project_id = project_id
       @sensitive_attrs = DEFAULT_SENSITIVE_ATTRS
-
-      return unless enabled_environment?
-
-      raise Errors::MissingApiKeyError if api_key.to_s.empty?
-      raise Errors::MissingProjectIdError if project_id.to_s.empty?
     end
 
     def monitoring_enabled?(request_url)
@@ -46,16 +38,17 @@ module Treblle
       @sensitive_attrs = attributes ? DEFAULT_SENSITIVE_ATTRS + attributes : DEFAULT_SENSITIVE_ATTRS
     end
 
+    def validate_credentials!
+      raise Errors::MissingApiKeyError if api_key.to_s.empty?
+      raise Errors::MissingProjectIdError if project_id.to_s.empty?
+    end
+
     private
 
     def whitelisted_endpoint?(request_url)
       Array(whitelisted_endpoints).any? do |endpoint|
         request_url.start_with?(endpoint)
       end
-    end
-
-    def enabled_environment?
-      enabled_environments.map(&:downcase).include?(Rails.env)
     end
 
     def restricted_endpoint?(request_url)

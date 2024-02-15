@@ -5,7 +5,6 @@ require 'treblle/utils/hash_sanitizer'
 
 module Treblle
   class GeneratePayload
-    TREBLLE_VERSION = '0.6'
     SDK_LANG = 'ruby'
     TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
@@ -34,14 +33,14 @@ module Treblle
     end
 
     def load_time
-      ((Time.now - started_at) * 1_000_000).round
+      ((Time.now - started_at) * 1000.0).round
     end
 
     def payload
       {
         api_key: configuration.api_key,
         project_id: configuration.project_id,
-        version: TREBLLE_VERSION,
+        version: Treblle::API_VERSION,
         sdk: SDK_LANG,
         data: {
           server: {

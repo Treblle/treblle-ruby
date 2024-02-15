@@ -19,11 +19,11 @@ RSpec.describe Treblle::Errors::MissingApiKeyError do
   end
 end
 
-RSpec.describe Treblle::Errors::InvalidEndpointError do
+RSpec.describe Treblle::Errors::MissingProjectIdError do
   describe '#initialize' do
     it 'creates a new instance of InvalidEndpointError with correct message' do
-      error = Treblle::Errors::InvalidEndpointError.new("Invalid Endpoint Error Message")
-      expect(error).to be_an_instance_of(Treblle::Errors::InvalidEndpointError)
+      error = Treblle::Errors::MissingProjectIdError.new("Invalid Endpoint Error Message")
+      expect(error).to be_an_instance_of(Treblle::Errors::MissingProjectIdError)
       expect(error.message).to eq("Invalid Endpoint Error Message")
     end
   end
