@@ -43,7 +43,7 @@ RSpec.describe Treblle::Dispatcher do
     end
 
     context 'when the Treblle request returns a response with status >= 400' do
-      it 'logs failed monitoring' do
+      it 'logs an error' do
         stub = stub_request(:post, treblle_url)
                .to_return(status: 400, body: 'Internal Server Error')
 
