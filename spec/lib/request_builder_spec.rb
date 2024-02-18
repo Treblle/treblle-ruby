@@ -91,13 +91,13 @@ RSpec.describe Treblle::RequestBuilder do
     end
 
     it 'stores Authorization header' do
-      env.merge!('HTTP_AUTHORIZATION' => 'Bearer token')
+      env['HTTP_AUTHORIZATION'] = 'Bearer token'
 
       expect(subject.headers['AUTHORIZATION']).to eq('Bearer token')
     end
 
     it 'stores Authorization header' do
-      env.merge!('X_REQUEST_ID' => '12345678')
+      env['X_REQUEST_ID'] = '12345678'
 
       expect(subject.headers['X-REQUEST-ID']).to eq('12345678')
     end
@@ -130,7 +130,7 @@ RSpec.describe Treblle::RequestBuilder do
 
     describe '#get_headers' do
       it 'returns a hash of headers' do
-        env.merge!('HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9')
+        env['HTTP_ACCEPT_LANGUAGE'] = 'en-US,en;q=0.9'
 
         expect(subject.send(:get_headers, request)).to include({ 'ACCEPT-LANGUAGE' => 'en-US,en;q=0.9' })
       end

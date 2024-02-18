@@ -35,17 +35,15 @@ module Treblle
 
     def send_payload_to_treblle
       Thread.new do
-        begin
-          response = make_http_request
+        response = make_http_request
 
-          if response.code.to_i >= 400
-            log_error(response.body)
-          else
-            log_success(response.body)
-          end
-        rescue StandardError => e
-          log_error(e.message)
+        if response.code.to_i >= 400
+          log_error(response.body)
+        else
+          log_success(response.body)
         end
+      rescue StandardError => e
+        log_error(e.message)
       end
     end
 

@@ -21,5 +21,5 @@ Gem::Specification.new do |spec|
      build, ship & maintain REST based APIs faster.
   EOF
 
-  spec.required_ruby_version = '>= 3.0.0'
+  spec.add_dependency "rails", ">= 6.1.0"
 end
