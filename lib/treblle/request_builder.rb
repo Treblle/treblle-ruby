@@ -66,6 +66,8 @@ module Treblle
         body = request_metadata.body.read
         request_metadata.body.rewind
         body.byteslice(0, MAX_BODY_LENGTH).force_encoding('utf-8').scrub
+
+        request_metadata.media_type == 'application/json' ? JSON.parse(body) : body
       end
     end
   end

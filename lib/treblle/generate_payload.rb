@@ -33,7 +33,7 @@ module Treblle
     end
 
     def load_time
-      ((Time.now - started_at) * 1000.0).round
+      Time.now - started_at
     end
 
     def payload

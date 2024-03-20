@@ -6,16 +6,15 @@ module Treblle
       class << self
         def sanitize(hash, sensitive_attrs)
           return {} if hash.nil? || hash.empty?
+          return hash unless hash.is_a?(Hash) || hash.is_a?(Array)
 
-          hash.each do |k, v|
-            value = v || k
-            if value.is_a?(Hash) || value.is_a?(Array)
-              sanitize(value, sensitive_attrs)
-            elsif sensitive_attrs.include?(k.to_s)
-              hash[k] = '*' * v.to_s.length
-            end
+          hash.each_with_object({}) do |(key, value), result|
+            result[key] = if value.is_a?(Hash) || value.is_a?(Array)
+                            sanitize_hash(value, sensitive_attrs)
+                          else
+                            sensitive_attrs.include?(key.to_s) ? '*' * value.to_s.length : value
+                          end
           end
-          hash
         end
       end
     end
