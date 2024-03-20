@@ -163,16 +163,13 @@ RSpec.describe Treblle::Middleware do
       )
     end
 
-    it 'makes a successful HTTP request to Treblle and logs the response' do
+    # This is scenario is handled by Exception Middleware
+    it 'fails to make an HTTP request to Treblle and handles the failure' do
       stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
-      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
-      status, headers, response_body = subject.call(env)
+      subject.call(env)
 
-      expect(stub).to have_been_requested
-      expect(status).to be 404
-      expect(response_body).to eq('OK')
-      expect(headers['REQUEST_METHOD']).to eq('GET')
+      expect(stub).not_to have_been_requested
     end
   end
 
@@ -185,16 +182,13 @@ RSpec.describe Treblle::Middleware do
       )
     end
 
-    it 'makes a successful HTTP request to Treblle and logs the response' do
+    # This is scenario is handled by Exception Middleware
+    it 'fails to make an HTTP request to Treblle and handles the failure' do
       stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
-      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
-      status, headers, response_body = subject.call(env)
+      subject.call(env)
 
-      expect(stub).to have_been_requested
-      expect(status).to be 401
-      expect(response_body).to eq('OK')
-      expect(headers['REQUEST_METHOD']).to eq('GET')
+      expect(stub).not_to have_been_requested
     end
   end
 
@@ -207,16 +201,13 @@ RSpec.describe Treblle::Middleware do
       )
     end
 
-    it 'makes a successful HTTP request to Treblle and logs the response' do
+    # This is scenario is handled by Exception Middleware
+    it 'fails to make an HTTP request to Treblle and handles the failure' do
       stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
-      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
-      status, headers, response_body = subject.call(env)
+      subject.call(env)
 
-      expect(stub).to have_been_requested
-      expect(status).to be 403
-      expect(response_body).to eq('OK')
-      expect(headers['REQUEST_METHOD']).to eq('GET')
+      expect(stub).not_to have_been_requested
     end
   end
 
@@ -229,16 +220,13 @@ RSpec.describe Treblle::Middleware do
       )
     end
 
-    it 'makes a successful HTTP request to Treblle and logs the response' do
+    # This is scenario is handled by Exception Middleware
+    it 'fails to make an HTTP request to Treblle and handles the failure' do
       stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
-      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
-      status, headers, response_body = subject.call(env)
+      subject.call(env)
 
-      expect(stub).to have_been_requested
-      expect(status).to be 500
-      expect(response_body).to eq('OK')
-      expect(headers['REQUEST_METHOD']).to eq('GET')
+      expect(stub).not_to have_been_requested
     end
   end
 end

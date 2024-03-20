@@ -72,9 +72,9 @@ RSpec.describe Treblle::RequestBuilder do
 
           result = subject.new(env).build
 
-          expect(result.body).to eq '{"something":"everything"}'
-          expect(result.body.encoding).to eq Encoding::UTF_8
-          expect(result.body.valid_encoding?).to be true
+          expect(result.body).to eq({ "something" => "everything" })
+          expect(result.body.to_json.encoding).to eq Encoding::UTF_8
+          expect(result.body.to_json.valid_encoding?).to be true
         end
       end
     end

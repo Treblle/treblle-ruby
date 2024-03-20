@@ -8,7 +8,7 @@ module Treblle
     SDK_LANG = 'ruby'
     TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
-    def initialize(request:, response:, started_at:, exception: nil, configuration: Treblle.configuration)
+    def initialize(request:, response:, started_at:, exception: false, configuration: Treblle.configuration)
       @request = request
       @response = response
       @started_at = started_at
@@ -73,7 +73,7 @@ module Treblle
             code: response.status,
             size: response.size,
             load_time: load_time,
-            body: sanitize(response.body),
+            body: response.body,
             errors: build_error_object
           }
         }
@@ -81,16 +81,30 @@ module Treblle
     end
 
     def build_error_object
-      return [] if exception.blank?
+      return [] if exception == false
+
+      trace = response.body.dig("traces", "Application Trace")&.first&.[]("trace")
+      file_path, line_number = get_exception_path_and_line(trace)
 
       [
         {
           source: 'onError',
-          type: exception.class.to_s || 'Unhandled error',
-          message: exception.message,
-          file: exception.backtrace
+          type: response.body["error"] || response.body["errors"] || 'Unhandled error',
+          message: response.body["exception"] || response.body["error"] || response.body["errors"],
+          file: file_path,
+          line: line_number
         }
       ]
+    end
+
+    def get_exception_path_and_line(trace)
+      return [nil, nil] if trace.nil?
+
+      match_data = trace.match(/^(.*):(\d+):in `.*'$/)
+      file_path = match_data[1]
+      line_number = match_data[2]
+
+      [file_path, line_number]
     end
   end
 end

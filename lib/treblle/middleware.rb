@@ -31,25 +31,20 @@ module Treblle
     def call_with_treblle_monitoring(env)
       started_at = Time.now
 
-      begin
-        response = @app.call(env)
-      rescue Exception => e
-        handle_monitoring(env, response, started_at, e)
-        raise e
-      end
+      response = @app.call(env)
+      status, _headers, _rack_response = response
 
-      handle_monitoring(env, response, started_at)
+      handle_monitoring(env, response, started_at) if status < 400
 
       response
     end
 
-    def handle_monitoring(env, rack_response, started_at, exception: nil)
+    def handle_monitoring(env, rack_response, started_at)
       configuration.validate_credentials!
 
       request = RequestBuilder.new(env).build
       response = ResponseBuilder.new(rack_response).build
-      payload = GeneratePayload.new(request: request, response: response, started_at: started_at,
-        exception: exception).call
+      payload = GeneratePayload.new(request: request, response: response, started_at: started_at).call
 
       Dispatcher.new(payload: payload).call
     rescue StandardError => e
