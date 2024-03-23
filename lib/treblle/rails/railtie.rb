@@ -1,11 +1,10 @@
-require 'rails'
 require 'treblle/rails/capture_exceptions'
+require 'rails'
 
 module Treblle
   module Rails
-    class TreblleRailtie < ::Rails::Railtie
-      initializer 'treblle_railtie.configure_rails_initialization' do |app|
-        Rails.logger.debug("debug::" + "TEST #{app.inspect}")
+    class Railtie < ::Rails::Railtie
+      initializer 'treblle.install_middleware' do |app|
         app.config.middleware.insert_after ActionDispatch::ShowExceptions, Treblle::Rails::CaptureExceptions
       end
     end

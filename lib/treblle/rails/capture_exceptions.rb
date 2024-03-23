@@ -22,8 +22,7 @@ module Treblle
         response = @app.call(env)
         status, _headers, _rack_response = response
 
-        handle_monitoring(env, response, started_at)
-        handle_monitoring(env, response, started_at) if status >= 400 && env["action_dispatch.exception"]
+        handle_monitoring(env, response, started_at) if status >= 400
 
         response
       end

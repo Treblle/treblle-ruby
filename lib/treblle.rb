@@ -2,7 +2,7 @@
 
 require 'treblle/middleware'
 require 'treblle/configuration'
-require 'treblle/rails/treblle_railtie'
+require 'treblle/rails/railtie'
 
 # Treblle middleware for request interception and gathering.
 module Treblle
