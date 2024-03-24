@@ -5,7 +5,7 @@ module Treblle
   module Rails
     class Railtie < ::Rails::Railtie
       initializer 'treblle.install_middleware' do |app|
-        app.config.middleware.insert_after ActionDispatch::ShowExceptions, Treblle::Rails::CaptureExceptions
+        app.config.middleware.insert_before ActionDispatch::ShowExceptions, Treblle::Rails::CaptureExceptions
       end
     end
   end

@@ -18,7 +18,16 @@ module Treblle
       end
 
       def call(env)
+        if should_monitor?(env)
+          call_with_treblle_monitoring(env)
+        else
+          @app.call(env)
+        end
+      end
+
+      def call_with_treblle_monitoring(env)
         started_at = Time.now
+
         response = @app.call(env)
         status, _headers, _rack_response = response
 
@@ -42,6 +51,10 @@ module Treblle
         Dispatcher.new(payload: payload).call
       rescue StandardError => e
         log_error(e.message)
+      end
+
+      def should_monitor?(env)
+        configuration.monitoring_enabled?(env['PATH_INFO'])
       end
     end
   end

@@ -81,7 +81,7 @@ module Treblle
     end
 
     def build_error_object
-      return [] if exception == false
+      return [] if exception == false || response.body.nil?
 
       trace = response.body.dig("traces", "Application Trace")&.first&.[]("trace")
       file_path, line_number = get_exception_path_and_line(trace)
