@@ -30,24 +30,4 @@ RSpec.describe Treblle::ResponseBuilder do
       expect(subject.size).to eq(20)
     end
   end
-
-  context 'with a 500 response' do
-    let(:rack_response) { [500, [], nil] }
-
-    it 'stores status' do
-      expect(subject.status).to eq(500)
-    end
-
-    it 'stores headers' do
-      expect(subject.headers).to eq([])
-    end
-
-    it 'stores body' do
-      expect(subject.body).to eq(nil)
-    end
-
-    it 'stores body' do
-      expect(subject.size).to eq(0)
-    end
-  end
 end

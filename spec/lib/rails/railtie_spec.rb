@@ -8,8 +8,7 @@ RSpec.describe Treblle::Rails::Railtie do
     let(:middleware) { double('middleware') }
 
     it 'inserts Treblle::Rails::CaptureExceptions middleware after ActionDispatch::ShowExceptions' do
-      expect(middleware).to receive(:insert_before).with(ActionDispatch::ShowExceptions,
-        Treblle::Rails::CaptureExceptions)
+      expect(middleware).to receive(:insert_after).with(ActionDispatch::ShowExceptions, Treblle::Middleware)
       described_class.initializers.find do |initializer|
         initializer.name == 'treblle.install_middleware'
       end.block.call(app)

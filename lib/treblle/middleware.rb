@@ -32,16 +32,12 @@ module Treblle
       started_at = Time.now
 
       response = @app.call(env)
-      status, _headers, _rack_response = response
-
-      handle_monitoring(env, response, started_at) if status < 400
+      handle_monitoring(env, response, started_at)
 
       response
     end
 
     def handle_monitoring(env, rack_response, started_at)
-      configuration.validate_credentials!
-
       request = RequestBuilder.new(env).build
       response = ResponseBuilder.new(rack_response).build
       payload = GeneratePayload.new(request: request, response: response, started_at: started_at).call
@@ -52,7 +48,7 @@ module Treblle
     end
 
     def should_monitor?(env)
-      configuration.monitoring_enabled?(env['PATH_INFO'])
+      configuration.enabled_environment? && configuration.monitoring_enabled?(env['PATH_INFO'])
     end
   end
 end

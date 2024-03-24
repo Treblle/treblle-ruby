@@ -8,11 +8,10 @@ module Treblle
     SDK_LANG = 'ruby'
     TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
-    def initialize(request:, response:, started_at:, exception: false, configuration: Treblle.configuration)
+    def initialize(request:, response:, started_at:, configuration: Treblle.configuration)
       @request = request
       @response = response
       @started_at = started_at
-      @exception = exception
       @configuration = configuration
     end
 
@@ -22,7 +21,7 @@ module Treblle
 
     private
 
-    attr_reader :request, :response, :started_at, :configuration, :exception
+    attr_reader :request, :response, :started_at, :configuration
 
     def sanitize(body)
       Utils::HashSanitizer.sanitize(body, configuration.sensitive_attrs)
@@ -74,37 +73,22 @@ module Treblle
             size: response.size,
             load_time: load_time,
             body: response.body,
-            errors: build_error_object
+            errors: errors
           }
         }
       }
     end
 
-    def build_error_object
-      return [] if exception == false || response.body.nil?
+    def errors
+      return [] if response.exception.nil?
 
-      trace = response.body.dig("traces", "Application Trace")&.first&.[]("trace")
-      file_path, line_number = get_exception_path_and_line(trace)
-
-      [
-        {
-          source: 'onError',
-          type: response.body["error"] || response.body["errors"] || 'Unhandled error',
-          message: response.body["exception"] || response.body["error"] || response.body["errors"],
-          file: file_path,
-          line: line_number
-        }
-      ]
-    end
-
-    def get_exception_path_and_line(trace)
-      return [nil, nil] if trace.nil?
-
-      match_data = trace.match(/^(.*):(\d+):in `.*'$/)
-      file_path = match_data[1]
-      line_number = match_data[2]
-
-      [file_path, line_number]
+      [{
+        source: 'onError',
+        type: response.exception.type,
+        message: response.exception.message,
+        file: response.exception.file_path,
+        line: response.exception.line_number
+      }]
     end
   end
 end

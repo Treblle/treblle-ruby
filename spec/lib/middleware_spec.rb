@@ -8,8 +8,36 @@ RSpec.describe Treblle::Middleware do
 
   let(:treblle_url) { 'https://rocknrolla.treblle.com' }
   let(:request_url) { '/api/some_endpoint' }
+  let(:exception_response_body) do
+    [JSON.generate({
+      error: "Internal Server Error",
+      exception: "#<StandardError: This is a test error message.>",
+      traces: {
+        'Application Trace': [
+          {
+            exception_object_id: 23_480,
+            id: 0,
+            trace: "app/controllers/api/v3/users_controller.rb:9:in `index'"
+          }
+        ],
+        'Framework Trace': [
+          {
+            exception_object_id: 23_480,
+            id: 1,
+            trace: "actionpack (7.1.3.2) lib/action_controller/metal/basic_implicit_render.rb:6:in `send_action'"
+          },
+          {
+            exception_object_id: 23_480,
+            id: 2,
+            trace: "..."
+          }
+        ]
+      }
+    })]
+  end
 
   before do
+    allow_any_instance_of(Treblle::Configuration).to receive(:enabled_environment?).and_return(true)
     allow_any_instance_of(Treblle::Configuration).to receive(:api_key).and_return('your_api_key')
     allow_any_instance_of(Treblle::Configuration).to receive(:project_id).and_return('project_id')
     allow_any_instance_of(Treblle::Dispatcher).to receive(:get_uri)
@@ -155,7 +183,7 @@ RSpec.describe Treblle::Middleware do
   end
 
   context 'when app request is not found' do
-    let(:app) { ->(env) { [404, env, 'OK'] } }
+    let(:app) { ->(env) { [404, env, exception_response_body] } }
     let(:env) do
       Rack::MockRequest.env_for(
         request_url,
@@ -163,18 +191,21 @@ RSpec.describe Treblle::Middleware do
       )
     end
 
-    # This is scenario is handled by Exception Middleware
-    it 'fails to make an HTTP request to Treblle and handles the failure' do
+    it 'makes a successful HTTP request to Treblle and logs the response' do
       stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
-      subject.call(env)
+      status, headers, response_body = subject.call(env)
 
-      expect(stub).not_to have_been_requested
+      expect(stub).to have_been_requested
+      expect(status).to be 404
+      expect(response_body).to eq(exception_response_body)
+      expect(headers['REQUEST_METHOD']).to eq('GET')
     end
   end
 
   context 'when app request is unauthorized' do
-    let(:app) { ->(env) { [401, env, 'OK'] } }
+    let(:app) { ->(env) { [401, env, exception_response_body] } }
     let(:env) do
       Rack::MockRequest.env_for(
         request_url,
@@ -182,18 +213,21 @@ RSpec.describe Treblle::Middleware do
       )
     end
 
-    # This is scenario is handled by Exception Middleware
-    it 'fails to make an HTTP request to Treblle and handles the failure' do
+    it 'makes a successful HTTP request to Treblle and logs the response' do
       stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
-      subject.call(env)
+      status, headers, response_body = subject.call(env)
 
-      expect(stub).not_to have_been_requested
+      expect(stub).to have_been_requested
+      expect(status).to be 401
+      expect(response_body).to eq(exception_response_body)
+      expect(headers['REQUEST_METHOD']).to eq('GET')
     end
   end
 
   context 'when app request is forbidden' do
-    let(:app) { ->(env) { [403, env, 'OK'] } }
+    let(:app) { ->(env) { [403, env, exception_response_body] } }
     let(:env) do
       Rack::MockRequest.env_for(
         request_url,
@@ -201,18 +235,21 @@ RSpec.describe Treblle::Middleware do
       )
     end
 
-    # This is scenario is handled by Exception Middleware
-    it 'fails to make an HTTP request to Treblle and handles the failure' do
+    it 'makes a successful HTTP request to Treblle and logs the response' do
       stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
-      subject.call(env)
+      status, headers, response_body = subject.call(env)
 
-      expect(stub).not_to have_been_requested
+      expect(stub).to have_been_requested
+      expect(status).to be 403
+      expect(response_body).to eq(exception_response_body)
+      expect(headers['REQUEST_METHOD']).to eq('GET')
     end
   end
 
   context 'when app request is server error' do
-    let(:app) { ->(env) { [500, env, 'OK'] } }
+    let(:app) { ->(env) { [500, env, exception_response_body] } }
     let(:env) do
       Rack::MockRequest.env_for(
         request_url,
@@ -220,13 +257,16 @@ RSpec.describe Treblle::Middleware do
       )
     end
 
-    # This is scenario is handled by Exception Middleware
-    it 'fails to make an HTTP request to Treblle and handles the failure' do
+    it 'makes a successful HTTP request to Treblle and logs the response' do
       stub = stub_request(:post, treblle_url).to_return(status: 200, body: 'OK')
+      expect(Logger).to receive_message_chain(:new, :info).with(/Successfully sent to Treblle:/)
 
-      subject.call(env)
+      status, headers, response_body = subject.call(env)
 
-      expect(stub).not_to have_been_requested
+      expect(stub).to have_been_requested
+      expect(status).to be 500
+      expect(response_body).to eq(exception_response_body)
+      expect(headers['REQUEST_METHOD']).to eq('GET')
     end
   end
 end

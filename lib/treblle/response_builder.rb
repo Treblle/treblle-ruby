@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'treblle/models/response'
+require 'treblle/models/response/exception'
 require 'active_support'
 require 'json'
 
@@ -27,6 +28,8 @@ module Treblle
       response.headers = headers
       response.body = parse_body(response_data) || parse_error_body(response_data)
       response.size = calculate_size(response.body, response.headers)
+      response.exception = Models::Response::Exception.new(response) if status >= 400
+
       response
     end
 

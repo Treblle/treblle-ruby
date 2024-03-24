@@ -13,6 +13,8 @@ module Treblle
 
     def configure
       yield(configuration)
+
+      configuration.validate_credentials! if configuration.enabled_environment?
     end
   end
 end

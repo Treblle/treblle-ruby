@@ -10,6 +10,9 @@ RSpec.describe Treblle::Configuration do
   before do
     config.api_key = 'your-api-key'
     config.project_id = 'your-project-id'
+    config.enabled_environments = 'development'
+
+    allow(Rails).to receive(:env).and_return('development')
   end
 
   context '#monitoring_enabled?' do
@@ -117,13 +120,53 @@ RSpec.describe Treblle::Configuration do
       expect(config.whitelisted_endpoints).to eq('/custom_endpoint/')
     end
 
-    describe 'when whitelisted_endpoints is an array' do
+    context 'when whitelisted_endpoints is an array' do
       before do
         config.whitelisted_endpoints = ['/api/', '/custom_endpoint/']
       end
 
       it 'uses the array for @whitelisted_endpoints' do
         expect(config.whitelisted_endpoints).to eq(['/api/', '/custom_endpoint/'])
+      end
+    end
+  end
+
+  describe '#enabled_environments=' do
+    it 'converts the value to an array' do
+      subject.enabled_environments = 'production'
+      expect(subject.enabled_environments).to eq(['production'])
+
+      subject.enabled_environments = %w[staging production]
+      expect(subject.enabled_environments).to eq(%w[staging production])
+
+      subject.enabled_environments = nil
+      expect(subject.enabled_environments).to eq([])
+    end
+  end
+
+  describe '#enabled_environment?' do
+    before do
+      allow(subject).to receive(:environment).and_return('production')
+    end
+
+    context 'when enabled_environments is empty' do
+      it 'returns false' do
+        subject.enabled_environments = []
+        expect(subject.enabled_environment?).to be_falsey
+      end
+    end
+
+    context 'when environment is included in enabled_environments' do
+      it 'returns true' do
+        subject.enabled_environments = ['production']
+        expect(subject.enabled_environment?).to be_truthy
+      end
+    end
+
+    context 'when environment is not included in enabled_environments' do
+      it 'returns false' do
+        subject.enabled_environments = ['staging']
+        expect(subject.enabled_environment?).to be_falsey
       end
     end
   end
