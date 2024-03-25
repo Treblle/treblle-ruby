@@ -67,24 +67,41 @@ This means data masking is super fast and happens on a programming level before 
 2. [Create a Treblle project](https://docs.treblle.com/en/dashboard/projects#creating-a-project).
 3. [Setup the SDK](#install-the-SDK) for your platform.
 
+#### SDK Requirements
+
+```ruby
+gem "rails", ">= 6.1"
+```
+
 ### Install the SDK
 
 Add the gem to your Gemfile:
 
 ```ruby
 # Gemfile
-gem "treblle", "~> 1.0.3"
+gem "treblle", "~> 2.0"
 ```
-Then add following line to config/application.rb, or if you want to include it to specific environment only, then e.g. `config/environments/development.rb` which registers Treblle middleware.
+Configure Treblle:
 
 ```ruby
-config.middleware.use(Treblle)
-```
-Finally, make sure to set environemnt variables as described below:
+# config/initializers/treblle.rb
 
-- `TREBLLE_API_KEY` (required)
-- `TREBLLE_PROJECT_ID` (required)
-- `TREBLLE_SENSITIVE_FIELDS` (optional)
+Treblle.configure do |config|
+  config.api_key               = ENV.fetch('TREBLLE_API_KEY')
+  config.project_id            = ENV.fetch('TREBLLE_PROJECT_ID')
+  config.enabled_environments  = %w[staging development]
+  config.sensitive_attrs       = %w[top_secret_custom_attribute password_digest]
+  config.restricted_endpoints  = %w[/api/users /api/v2/*]
+  config.whitelisted_endpoints = %w[/api/]
+end
+```
+
+- `config.api_key` (required)
+- `config.project_id` (required)
+- `config.enabled_environments` (required) - enables monitoring on specified environments
+- `config.sensitive_attrs` (optional) - mask additional attributes
+- `config.restricted_endpoints` (optional) - routes that you don't want to monitor
+- `config.whitelisted_endpoints` (optional) - routes that you want to monitor, by default `/api/`
 
 > See the [docs](https://docs.treblle.com/en/integrations/ruby) for this SDK to learn more.
 
