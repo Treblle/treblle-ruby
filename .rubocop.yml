@@ -5,6 +5,7 @@ AllCops:
     - "treblle-ruby.gemspec"
     - "Gemfile.lock"
     - "gemfiles/*"
+    - "vendor/**/*"
 
 require:
   - rubocop-performance
