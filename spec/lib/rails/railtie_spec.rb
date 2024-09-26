@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+require 'rspec'
 require 'rails'
 require 'treblle/rails/railtie'
 
