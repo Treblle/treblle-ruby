@@ -8,6 +8,9 @@ gem "appraisal"
 gem 'rails'
 gem 'rake'
 gem 'rspec'
-gem 'rubocop', require: false
-gem 'rubocop-performance', require: false
 gem 'webmock'
+
+group 'rubocop' do
+  gem 'rubocop', require: false
+  gem 'rubocop-performance', require: false
+end
