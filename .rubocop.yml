@@ -126,3 +126,6 @@ Style/StringConcatenation:
 
 Style/DocumentDynamicEvalDefinition:
   Enabled: false
+
+Style/Documentation:
+  Enabled: false
