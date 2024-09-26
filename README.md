@@ -4,6 +4,7 @@
 <div align="center">
 
 # Treblle
+[![Build Status](https://github.com/Treblle/treblle-ruby/workflows/Tests/badge.svg)](https://github.com/pay-rails/pay/actions) [![Gem Version](https://badge.fury.io/rb/treblle.svg)](https://badge.fury.io/rb/treblle)
 
 <a href="https://docs.treblle.com/en/integrations" target="_blank">Integrations</a>
 <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
