@@ -8,10 +8,11 @@ module Treblle
     SDK_LANG = 'ruby'
     TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
-    def initialize(request:, response:, started_at:, configuration: Treblle.configuration)
+    def initialize(request:, response:, started_at:, load_time:, configuration: Treblle.configuration)
       @request = request
       @response = response
       @started_at = started_at
+      @load_time = load_time
       @configuration = configuration
     end
 
@@ -21,18 +22,14 @@ module Treblle
 
     private
 
-    attr_reader :request, :response, :started_at, :configuration
+    attr_reader :request, :response, :started_at, :load_time, :configuration
 
     def sanitize(body)
       Utils::HashSanitizer.sanitize(body, configuration.sensitive_attrs)
     end
 
     def timestamp
-      started_at.strftime(TIME_FORMAT)
-    end
-
-    def load_time
-      Time.now - started_at
+      started_at.utc.strftime(TIME_FORMAT)
     end
 
     def payload
