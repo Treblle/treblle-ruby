@@ -59,6 +59,8 @@ module Treblle
     end
 
     def get_body(request_metadata)
+      return if request_metadata.body.nil?
+
       case request_metadata.media_type
       when 'application/x-www-form-urlencoded', 'multipart/form-data'
         request_metadata.POST.dup
