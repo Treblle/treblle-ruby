@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    treblle (2.0.2)
+    treblle (2.1.0)
       rails (>= 6.1.0)
 
 GEM
