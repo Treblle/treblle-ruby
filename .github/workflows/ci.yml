@@ -1,13 +1,8 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
-# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
-
-name: Tests
+name: Build
 
 on:
+  push:
+    branches: ["master", "main"]
   pull_request:
     branches: ["**"]
 
@@ -15,6 +10,21 @@ permissions:
   contents: read
 
 jobs:
+  rubocop:
+    name: RuboCop
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_ONLY: rubocop
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Ruby and install gems
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.0
+          bundler-cache: true
+      - name: Run Rubocop
+        run: bundle exec rubocop --parallel
   test:
     runs-on: ubuntu-latest
     strategy:

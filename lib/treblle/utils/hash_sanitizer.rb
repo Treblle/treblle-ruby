@@ -32,7 +32,7 @@ module Treblle
         end
 
         def sanitize_value(key, value, sensitive_attrs)
-          sensitive_attrs.include?(key.to_s) ? '*' * value.to_s.length : value
+          sensitive_attrs.include?(key.to_s) ? "*****" : value
         end
       end
     end

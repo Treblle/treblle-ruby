@@ -5,6 +5,7 @@ AllCops:
     - "treblle-ruby.gemspec"
     - "Gemfile.lock"
     - "gemfiles/*"
+    - "vendor/**/*"
 
 require:
   - rubocop-performance
@@ -125,4 +126,7 @@ Style/StringConcatenation:
   Enabled: false
 
 Style/DocumentDynamicEvalDefinition:
+  Enabled: false
+
+Style/Documentation:
   Enabled: false
