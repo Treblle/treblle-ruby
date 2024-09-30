@@ -14,3 +14,7 @@ group 'rubocop' do
   gem 'rubocop', require: false
   gem 'rubocop-performance', require: false
 end
+
+group 'test' do
+  gem 'simplecov', require: false
+end

@@ -48,4 +48,27 @@ jobs:
           bundler-cache: true
           rubygems: latest
       - name: Run specs
-        run: bundle exec rake spec
+        run: COVERAGE=true bundle exec rake spec
+      - name: Upload Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-ubuntu-${{ matrix.ruby }}
+          path: coverage/coverage.json
+          if-no-files-found: error
+  upload_coverage:
+    name: Upload Coverage
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        name: Download Coverage Artifacts
+        with:
+          pattern: coverage-*
+      - uses: paambaati/codeclimate-action@v9
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        if: ${{ env.CC_TEST_REPORTER_ID != '' }}
+        with:
+          coverageLocations: |
+            ${{github.workspace}}/coverage-*/coverage.json:simplecov
